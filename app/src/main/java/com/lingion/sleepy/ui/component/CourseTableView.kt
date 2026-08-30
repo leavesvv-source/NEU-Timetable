@@ -1,0 +1,750 @@
+package com.lingion.sleepy.ui.component
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.lingion.sleepy.R
+import com.lingion.sleepy.data.entity.CourseEntity
+import com.lingion.sleepy.ui.theme.SleepyTextStyle
+import com.lingion.sleepy.ui.theme.SleepyTheme
+import com.lingion.sleepy.ui.theme.noRippleClickable
+import com.lingion.sleepy.util.AppPrefs
+import com.lingion.sleepy.util.CourseColorUtil
+import com.lingion.sleepy.util.DateUtils
+import com.lingion.sleepy.util.TimeTableUtils
+import java.time.LocalTime
+
+/**
+ * 时段定义 — 5 个时段（对应 HTML 里的 5 个 slot-row）
+ * 与 WakeUp 默认 12 节对应: 1-2 / 3-5 / 6-7 / 8-10 / 11-13
+ */
+data class TimeSlot(
+    val label: String,         // "1-2节"
+    val start: LocalTime,
+    val end: LocalTime,
+    val displayStart: String,  // "08:00"
+    val displayEnd: String,    // "09:35"
+    val nodeStart: Int,
+    val nodeEnd: Int
+) {
+    // nodeString 死属性已删（恒返回 "N-N" 且全库零调用; 界面用的是 CourseEntity.nodeString 本地化版本）
+    val timeString: String get() = "$displayStart-$displayEnd"
+}
+
+/**
+ * Cards 网格视图
+ *
+ * 架构：
+ *   BoxWithConstraints(fillMaxSize) → 算出 colW (dp)
+ *     Column(fillMaxWidth, verticalScroll)
+ *       Row(表头)            — Compose 自然排版
+ *       Box(固定高度 = maxNode * rowH) — 时间栏 + 课程卡片全用 Modifier.offset 绝对定位
+ *
+ * 关键点：
+ * - Column 用 fillMaxWidth（不是 fillMaxSize），内容高度 = 表头 + 固定 gridH，超出视口 → 可滚动
+ * - 时间栏 / 卡片都在同一个 Box 内，Modifier.offset 定位 → 滚动完全同步
+ * - 全用 dp 算 offset，不碰 px，不碰 Layout measure/place
+ */
+@Composable
+fun CardsGridView(
+    courses: List<CourseEntity>,
+    timeSlots: List<TimeSlot>,
+    visibleDays: Set<Int> = (1..7).toSet(),
+    showDate: Boolean = false,
+    startDate: String = "",
+    currentWeek: Int = 1,
+    today: Int = DateUtils.todayDayOfWeek(),
+    onCourseClick: (CourseEntity) -> Unit,
+    modifier: Modifier = Modifier,
+    greyDays: Set<Int> = emptySet()  // 本周应灰显的星期几 (1-7)
+) {
+    val colors = SleepyTheme.colors
+    val maxNode = timeSlots.maxOfOrNull { it.nodeEnd } ?: 12
+    val sortedDays = DateUtils.sundayFirst(visibleDays)
+    val dayCount = sortedDays.size
+
+    // 布局常量（全 dp）
+    val headH = 52.dp
+    val timeW = 68.dp
+    val slotH = 52.dp
+    val gapH = 4.dp
+    val gapW = 5.dp
+    val rowH = slotH + gapH   // 56dp
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(colors.surfaceContainerHigh, SleepyTheme.shapes.large)
+            .padding(8.dp)
+    ) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // 算出每列宽度 (dp)
+            val colW = (maxWidth - timeW - gapW * (dayCount + 1)) / dayCount
+            val gridH = rowH * maxNode   // grid 内容区固定高度
+
+            val scrollState = rememberScrollState()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
+            ) {
+                // ---- 表头：自然 Compose Row ----
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(headH),
+                    horizontalArrangement = Arrangement.spacedBy(gapW),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.width(timeW))
+                    for (day in sortedDays) {
+                        val dateStr = if (showDate && startDate.isNotBlank()) {
+                            try {
+                                val d = DateUtils.dateOfWeek(startDate, currentWeek, day)
+                                DateUtils.shortDate(d)
+                            } catch (_: Exception) { null }
+                        } else null
+                        DayHeadCell(
+                            day = day,
+                            isToday = day == today,
+                            isGrey = day in greyDays,
+                            courseCount = courses.count { it.day == day },
+                            dateStr = dateStr,
+                            modifier = Modifier.width(colW).fillMaxHeight()
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(gapH))
+
+                // ---- Grid 主体：固定高度 Box，内部全用 Modifier.offset 绝对定位 ----
+                Box(modifier = Modifier.fillMaxWidth().height(gridH)) {
+                    // 时间栏：每个节次一个 Row，用 offset 定位到正确 y
+                    for ((i, slot) in timeSlots.withIndex()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(slotH)
+                                .offset(y = rowH * i),
+                            horizontalArrangement = Arrangement.spacedBy(gapW),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SingleTimeHeadCell(
+                                slot = slot,
+                                modifier = Modifier.width(timeW).fillMaxHeight()
+                            )
+                            // 透明占位：保证行宽和表头一致
+                            for (day in sortedDays) {
+                                Spacer(modifier = Modifier.width(colW).fillMaxHeight())
+                            }
+                        }
+                    }
+
+                    // 课程卡片：用 offset 绝对定位
+                    for (course in courses) {
+                        if (course.day !in visibleDays) continue
+                        if (course.startNode !in 1..maxNode) continue
+                        val dayIdx = sortedDays.indexOf(course.day)
+                        val steps = course.step.coerceAtLeast(1)
+                            .coerceAtMost(maxNode - course.startNode + 1)
+                        val cardX = timeW + gapW + (colW + gapW) * dayIdx
+                        val cardY = rowH * (course.startNode - 1)
+                        val cardH = rowH * steps - gapH
+
+                        CourseOverlayCard(
+                            course = course,
+                            onClick = { onCourseClick(course) },
+                            modifier = Modifier
+                                .offset(x = cardX, y = cardY)
+                                .width(colW)
+                                .height(cardH),
+                            isGrey = course.day in greyDays
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SingleTimeHeadCell(slot: TimeSlot, modifier: Modifier = Modifier) {
+    val colors = SleepyTheme.colors
+    val shape = SleepyTheme.shapes.medium
+    Box(
+        modifier = modifier.padding(2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .clip(shape)
+                .background(colors.surfaceContainerLow)
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.period_format_node, slot.label),
+                    style = SleepyTextStyle.smallMeta().copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.onSurface,
+                    maxLines = 1
+                )
+                Spacer(modifier = Modifier.height(1.dp))
+                Text(
+                    text = slot.timeString,
+                    style = SleepyTextStyle.micro(),
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+// EmptyGridCell 死组件已删（注释自述弃用, 全库零调用——Cards 网格走 SingleTimeHeadCell + CourseOverlayCard）。
+
+@Composable
+private fun CourseOverlayCard(
+    course: CourseEntity,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isGrey: Boolean = false
+) {
+    val palette = SleepyTheme.palette
+    val colors = SleepyTheme.colors
+    val context = androidx.compose.ui.platform.LocalContext.current
+    // 统一取色入口（决策 D3）— colorless 读取 AppPrefs course_colorless 独立开关
+    val bg = CourseColorUtil.pickCourseColorCompose(
+        course = course,
+        isDark = CourseColorUtil.isPaletteDark(palette),
+        neutralColor = colors.surfaceVariant,
+        colorless = AppPrefs.isCourseColorless(context)
+    )
+    // 文字色亮度自适应（决策 D5-13）— 深色自定义课色上切白字，浅色底仍 onSurface
+    val fg = CourseColorUtil.textColorOn(bg, CourseColorUtil.isPaletteDark(palette), colors.onSurface)
+    val shape = SleepyTheme.shapes.medium
+    // 副信息（教室/教师/无）— 左栏 SingleTimeHeadCell 已有节次+时间，卡片 y 位置本身编码节次，
+    // 故卡内不再显示节次/时间，改由 grid_sub_info 设置决定
+    val subInfo = AppPrefs.getGridSubInfo(context)
+    val subText = when (subInfo) {
+        "room" -> course.room
+        "teacher" -> course.teacher
+        else -> ""
+    }
+
+    // 节假日灰显：色块叠 alpha + 文字应用 strikethrough 样式
+    val effectiveBg = if (isGrey) bg.copy(alpha = SleepyTheme.Alpha.inactive) else bg
+    val effectiveFg = if (isGrey) fg.copy(alpha = SleepyTheme.Alpha.inactive) else fg
+    val holidayStyle = AppPrefs.getHolidayStyle(context)
+    val textDecoration = if (isGrey && holidayStyle == "strikethrough") {
+        androidx.compose.ui.text.style.TextDecoration.LineThrough
+    } else null
+
+    Box(
+        modifier = modifier
+            .padding(2.dp)
+            .clip(shape)
+            .background(effectiveBg)
+            .noRippleClickable(onClick)
+            .padding(4.dp)
+    ) {
+        if (subText.isBlank()) {
+            // 无副信息: 课程名整体居中(原行为)
+            Text(
+                text = course.courseName,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 10.sp,
+                    lineHeight = 13.sp,
+                    textDecoration = textDecoration
+                ),
+                color = effectiveFg,
+                maxLines = 6,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            // 有副信息: 课程名在剩余空间内居中, 副信息贴卡底 — 主文字不再紧贴副文字
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 用 weight(1f) 占位让课程名在上半区居中, 避免正正好好贴住副文字
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = course.courseName,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 10.sp,
+                            lineHeight = 13.sp,
+                            textDecoration = textDecoration
+                        ),
+                        color = effectiveFg,
+                        maxLines = 6,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Text(
+                    text = subText,
+                    style = SleepyTextStyle.micro().copy(textDecoration = textDecoration),
+                    color = effectiveFg.copy(alpha = SleepyTheme.Alpha.highContent),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DayHeadCell(day: Int, isToday: Boolean, isGrey: Boolean = false, courseCount: Int, dateStr: String? = null, dayLabel: String = DateUtils.localizedDay(day, androidx.compose.ui.platform.LocalContext.current), modifier: Modifier = Modifier) {
+    val colors = SleepyTheme.colors
+    val bg = if (isToday) colors.primaryContainer else colors.surface
+    val fg = if (isGrey) colors.onSurfaceVariant.copy(alpha = SleepyTheme.Alpha.inactive) else if (isToday) colors.onPrimaryContainer else colors.onSurface
+    val subFg = if (isGrey) colors.onSurfaceVariant.copy(alpha = SleepyTheme.Alpha.inactive) else if (isToday) colors.onPrimaryContainer.copy(alpha = SleepyTheme.Alpha.highContent) else colors.onSurfaceVariant
+
+    Box(
+        modifier = modifier
+            .height(if (dateStr != null) 56.dp else 52.dp)
+            .clip(SleepyTheme.shapes.large)
+            .background(bg)
+            .padding(vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            Text(
+                text = dayLabel,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = fg,
+                maxLines = 1
+            )
+            if (dateStr != null) {
+                Text(
+                    text = dateStr,
+                    style = SleepyTextStyle.micro().copy(fontSize = 10.sp),
+                    color = subFg,
+                    maxLines = 1
+                )
+            } else {
+                Text(
+                    text = if (courseCount == 0) stringResource(R.string.no_course) else stringResource(R.string.course_count_format, courseCount),
+                    style = SleepyTextStyle.micro(),
+                    color = subFg,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+
+// TimeHeadCell / SpannedTimeHeadCell 死组件已删（SpannedTimeHeadCell 注释自述弃用,
+// TimeHeadCell 被 SingleTimeHeadCell 取代, 两者全库零调用; CELL_H 常量随之删除）。
+
+// pickCourseColor / isPaletteDark / hslToColor 三函数已收敛至 util/CourseColorUtil.kt（决策 D3 单一事实来源）。
+// 原注释 S/L 值写错（0.48/0.88、0.35/0.26），实际为亮色 S=0.55 L=0.82 / 暗色 S=0.40 L=0.28，正确值见 CourseColorUtil 常量。
+
+// =====================================================================================
+// 7days full 视图 — switchable.html #fullView
+// =====================================================================================
+
+@Composable
+fun FullWeekView(
+    courses: List<CourseEntity>,
+    visibleDays: Set<Int> = (1..7).toSet(),
+    displayMode: String = "node",
+    timeJson: String = "",
+    today: Int = DateUtils.todayDayOfWeek(),
+    onCourseClick: (CourseEntity) -> Unit,
+    modifier: Modifier = Modifier,
+    greyDays: Set<Int> = emptySet()
+) {
+    val byDay = courses.groupBy { it.day }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(0.dp)
+    ) {
+        WeekStrip(
+            byDay = byDay,
+            visibleDays = visibleDays,
+            today = today,
+            greyDays = greyDays,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+        )
+        DetailPanel(
+            byDay = byDay,
+            visibleDays = visibleDays,
+            displayMode = displayMode,
+            timeJson = timeJson,
+            today = today,
+            onCourseClick = onCourseClick,
+            greyDays = greyDays
+        )
+    }
+}
+
+@Composable
+private fun WeekStrip(
+    byDay: Map<Int, List<CourseEntity>>,
+    today: Int,
+    visibleDays: Set<Int>,
+    greyDays: Set<Int> = emptySet(),
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        for (day in DateUtils.sundayFirst(visibleDays)) {
+            val dayCourses = byDay[day].orEmpty()
+            val isToday = day == today
+            DaySummaryCell(
+                day = day,
+                courses = dayCourses,
+                isToday = isToday,
+                isGrey = day in greyDays,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DaySummaryCell(
+    day: Int,
+    courses: List<CourseEntity>,
+    isToday: Boolean,
+    isGrey: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val colors = SleepyTheme.colors
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val bg = if (isToday) colors.primaryContainer else colors.surfaceContainer
+    val fg = if (isGrey) colors.onSurfaceVariant.copy(alpha = SleepyTheme.Alpha.inactive) else if (isToday) colors.onPrimaryContainer else colors.onSurface
+    // Chip: solid surfaceVariant with full alpha for dark mode readability
+    val chipBg = colors.surfaceVariant
+    val chipFg = colors.onSurfaceVariant.copy(alpha = if (isGrey) SleepyTheme.Alpha.inactive else 1f)
+
+    Column(
+        modifier = modifier
+            .height(132.dp)
+            .clip(SleepyTheme.shapes.medium)
+            .background(bg)
+            .padding(horizontal = 6.dp, vertical = 8.dp)
+    ) {
+        // 日期
+        Text(
+            text = DateUtils.localizedDay(day, context),
+            style = SleepyTextStyle.dayLabel(),
+            color = fg,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Chip: 课程数 — 完整文字在列宽内换行就退化为纯数字，胶囊自动缩到数字宽度
+        if (courses.isEmpty()) {
+            Spacer(modifier = Modifier.height(14.dp))
+        } else {
+            val fullText = stringResource(R.string.course_count_format, courses.size)
+            val numberText = courses.size.toString()
+            val chipStyle = SleepyTextStyle.smallMeta().copy(fontWeight = FontWeight.SemiBold)
+            val textMeasurer = rememberTextMeasurer()
+            BoxWithConstraints(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                val chipPaddingPx = with(LocalDensity.current) { 14.dp.toPx() }.toInt()
+                val availablePx = with(LocalDensity.current) { maxWidth.toPx() }.toInt()
+                val layoutResult = textMeasurer.measure(
+                    text = fullText,
+                    style = chipStyle,
+                    constraints = Constraints(maxWidth = (availablePx - chipPaddingPx).coerceAtLeast(0))
+                )
+                val showNumberOnly = layoutResult.lineCount > 1
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(chipBg)
+                        .padding(horizontal = 7.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = if (showNumberOnly) numberText else fullText,
+                        style = chipStyle,
+                        color = chipFg,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Mini-list: 前 5 门课名（改掉 take(3)，空间够就全显示）
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            courses.take(5).forEach { c ->
+                Text(
+                    text = c.courseName,
+                    style = SleepyTextStyle.micro(),
+                    color = if (isToday) colors.onPrimaryContainer.copy(alpha = SleepyTheme.Alpha.highContent) else colors.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailPanel(
+    byDay: Map<Int, List<CourseEntity>>,
+    today: Int,
+    visibleDays: Set<Int>,
+    displayMode: String,
+    timeJson: String,
+    onCourseClick: (CourseEntity) -> Unit,
+    greyDays: Set<Int> = emptySet()
+) {
+    val colors = SleepyTheme.colors
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SleepyTheme.shapes.large)
+            .background(colors.surfaceContainerHigh)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        for (day in DateUtils.sundayFirst(visibleDays)) {
+            val dayCourses = byDay[day].orEmpty().sortedBy { it.startNode }
+            DetailDayCard(
+                day = day,
+                courses = dayCourses,
+                isToday = day == today,
+                displayMode = displayMode,
+                timeJson = timeJson,
+                onCourseClick = onCourseClick,
+                isGrey = day in greyDays
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailDayCard(
+    day: Int,
+    courses: List<CourseEntity>,
+    isToday: Boolean,
+    isGrey: Boolean = false,
+    displayMode: String = "node",
+    timeJson: String = "",
+    onCourseClick: (CourseEntity) -> Unit
+) {
+    val colors = SleepyTheme.colors
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SleepyTheme.shapes.medium)
+            .background(if (courses.isEmpty()) colors.surfaceContainerLow else colors.surface)
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // 头部：星期 + 今天标记
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = DateUtils.localizedDay(day, context) + if (isToday) stringResource(R.string.today_suffix) else "",
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = if (isGrey) colors.onSurfaceVariant.copy(alpha = SleepyTheme.Alpha.inactive) else colors.onSurface
+            )
+        }
+
+        if (courses.isEmpty()) {
+            Text(
+                text = DateUtils.localizedDay(day, context) + stringResource(R.string.no_course_today),
+                style = SleepyTextStyle.smallMeta().copy(fontSize = 12.sp, lineHeight = 16.sp),
+                color = if (isGrey) colors.onSurfaceVariant.copy(alpha = SleepyTheme.Alpha.inactive) else colors.onSurfaceVariant
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                courses.forEach { c ->
+                    LessonRow(course = c, displayMode = displayMode, timeJson = timeJson, onClick = { onCourseClick(c) }, isGrey = isGrey)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LessonRow(course: CourseEntity, displayMode: String, timeJson: String, onClick: () -> Unit, isGrey: Boolean = false) {
+    val colors = SleepyTheme.colors
+    val palette = SleepyTheme.palette
+    val context = androidx.compose.ui.platform.LocalContext.current
+    // 统一取色入口（决策 D3）— colorless 读取 AppPrefs course_colorless 独立开关
+    val bg = CourseColorUtil.pickCourseColorCompose(
+        course = course,
+        isDark = CourseColorUtil.isPaletteDark(palette),
+        neutralColor = colors.surfaceVariant,
+        colorless = AppPrefs.isCourseColorless(context)
+    )
+    // 文字色亮度自适应（决策 D5-13）— 深色自定义课色上切白字，浅色底仍 onSurface
+    val fg = CourseColorUtil.textColorOn(bg, CourseColorUtil.isPaletteDark(palette), colors.onSurface)
+    val effectiveBg = if (isGrey) bg.copy(alpha = SleepyTheme.Alpha.inactive) else bg
+    val effectiveFg = if (isGrey) fg.copy(alpha = SleepyTheme.Alpha.inactive) else fg
+    val holidayStyle = AppPrefs.getHolidayStyle(context)
+    val textDecoration = if (isGrey && holidayStyle == "strikethrough") androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+
+    // time 模式：「08:00-\n08:45」——时间段在连字符后折行，行距收紧读成一个整体
+    val timeParts = if (displayMode == "time" && timeJson.isNotBlank()) {
+        TimeTableUtils.courseTimeParts(course.startNode, course.step, timeJson, course.ownTime, course.startTime, course.endTime)
+    } else null
+    val nodeLabel = course.shortNodeString(context)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(SleepyTheme.shapes.medium)
+            .background(effectiveBg)
+            .noRippleClickable(onClick)
+            .padding(9.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val sideStyle = SleepyTextStyle.smallMeta().copy(
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            textDecoration = textDecoration
+        )
+        if (timeParts != null) {
+            Text(
+                text = "${timeParts.first}-\n${timeParts.second}",
+                style = sideStyle,
+                color = effectiveFg,
+                modifier = Modifier.width(42.dp)
+            )
+        } else {
+            Text(
+                text = nodeLabel,
+                style = sideStyle,
+                color = effectiveFg,
+                modifier = Modifier.width(42.dp),
+                maxLines = 1
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = course.courseName,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeightStyle = LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Top,
+                        trim = LineHeightStyle.Trim.FirstLineTop
+                    ),
+                    textDecoration = textDecoration
+                ),
+                color = effectiveFg,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            val meta = buildString {
+                if (course.teacher.isNotBlank()) append(course.teacher)
+                if (course.room.isNotBlank()) {
+                    if (isNotEmpty()) append(" · ")
+                    append(course.room)
+                }
+            }
+            if (meta.isNotEmpty()) {
+                Text(
+                    text = meta,
+                    style = SleepyTextStyle.smallMeta().copy(textDecoration = textDecoration),
+                    color = effectiveFg.copy(alpha = SleepyTheme.Alpha.highContent),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+// =====================================================================================
+// 公共小组件
+// =====================================================================================
+
+@Composable
+fun SectionHead(title: String, action: String? = null) {
+    val colors = SleepyTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = SleepyTextStyle.sectionHead(),
+            color = colors.onSurface
+        )
+        if (action != null) {
+            Text(
+                text = action,
+                style = SleepyTextStyle.smallMeta().copy(
+                    fontWeight = FontWeight.Medium,
+                    color = colors.primary
+                )
+            )
+        }
+    }
+}
+
+
+// sp 已被上面 textStyle 直接用 inline

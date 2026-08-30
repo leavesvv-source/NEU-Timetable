@@ -1,0 +1,106 @@
+package com.lingion.sleepy.util
+
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.WeekFields
+import java.util.Locale
+
+/**
+ * 日期/周次工具 — 完全不依赖 Android Context，单元测试方便。
+ */
+object DateUtils {
+
+    private val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val isoWeekFields = WeekFields.of(DayOfWeek.SUNDAY, 1)
+    val SUNDAY_FIRST_DAYS: List<Int> = listOf(7, 1, 2, 3, 4, 5, 6)
+
+    private fun sundayWeekStart(date: LocalDate): LocalDate =
+        date.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+
+    fun sundayFirstIndex(dayOfWeek: Int): Int = if (dayOfWeek == 7) 0 else dayOfWeek
+
+    fun sundayFirst(days: Iterable<Int>): List<Int> =
+        days.filter { it in 1..7 }.distinct().sortedBy(::sundayFirstIndex)
+
+    enum class SemesterStatus { BEFORE_START, IN_RANGE, AFTER_END }
+
+    fun semesterStatus(startDate: String, maxWeek: Int, today: LocalDate = LocalDate.now()): SemesterStatus {
+        return try {
+            val start = sundayWeekStart(LocalDate.parse(startDate, dateFormat))
+            when {
+                today.isBefore(start) -> SemesterStatus.BEFORE_START
+                ChronoUnit.DAYS.between(start, today) / 7 + 1 > maxWeek -> SemesterStatus.AFTER_END
+                else -> SemesterStatus.IN_RANGE
+            }
+        } catch (_: Exception) { SemesterStatus.IN_RANGE }
+    }
+
+    /** 计算当前是学期第几周（1-based）；学期外统一钳制到可浏览范围。 */
+    fun currentWeek(startDate: String, today: LocalDate = LocalDate.now()): Int {
+        return try {
+            val start = sundayWeekStart(LocalDate.parse(startDate, dateFormat))
+            val days = ChronoUnit.DAYS.between(start, today)
+            maxOf(1, (days / 7).toInt() + 1)
+        } catch (e: Exception) {
+            1
+        }
+    }
+
+    /** 今天是星期几（1=周一, 7=周日） */
+    fun todayDayOfWeek(today: LocalDate = LocalDate.now()): Int {
+        // Java DayOfWeek.MONDAY = 1 ... SUNDAY = 7
+        return today.dayOfWeek.value
+    }
+
+    /** 从周数和星期几得到具体日期 */
+    fun dateOfWeek(startDate: String, week: Int, dayOfWeek: Int): LocalDate {
+        val start = sundayWeekStart(LocalDate.parse(startDate, dateFormat))
+        return start.plusWeeks((week - 1).toLong()).plusDays(sundayFirstIndex(dayOfWeek).toLong())
+    }
+
+    /** 同一周内指定星期几的日期（以 ref 为参照，1=周一 7=周日） */
+    fun dateOfWeekDay(ref: LocalDate, dayOfWeek: Int): LocalDate {
+        return sundayWeekStart(ref).plusDays(sundayFirstIndex(dayOfWeek).toLong())
+    }
+
+    /** ISO 周编号 */
+    fun isoWeekNumber(date: LocalDate): Int = date.get(isoWeekFields.weekOfWeekBasedYear())
+
+    /** 短日期 (MM-dd) */
+    fun shortDate(date: LocalDate): String =
+        date.format(DateTimeFormatter.ofPattern("MM-dd"))
+
+    /** 完整日期 (yyyy-MM-dd) */
+    fun fullDate(date: LocalDate): String = date.format(dateFormat)
+
+    /** 中文星期 */
+    fun chineseDay(dayOfWeek: Int): String = when (dayOfWeek) {
+        1 -> "周一"
+        2 -> "周二"
+        3 -> "周三"
+        4 -> "周四"
+        5 -> "周五"
+        6 -> "周六"
+        7 -> "周日"
+        else -> ""
+    }
+
+    /** Locale-aware 星期 — 读取 string array */
+    fun localizedDay(dayOfWeek: Int, dayNames: Array<String>): String {
+        val idx = dayOfWeek - 1
+        return if (idx in dayNames.indices) dayNames[idx] else ""
+    }
+
+    /** Locale-aware 星期 — 直接接受 Context，从 R.array.day_names 取本地化字符串数组 */
+    fun localizedDay(dayOfWeek: Int, context: android.content.Context): String {
+        val names = context.resources.getStringArray(com.lingion.sleepy.R.array.day_names)
+        return localizedDay(dayOfWeek, names)
+    }
+
+    /** 短日期格式 M/d（无前导零） */
+    fun shortDateSlash(date: LocalDate): String =
+        "${date.monthValue}/${date.dayOfMonth}"
+}

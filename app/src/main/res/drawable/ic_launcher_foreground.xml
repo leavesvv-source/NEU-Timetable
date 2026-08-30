@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 原创东大课表图标：暖纸底上的陶土色日历，不使用学校校徽。 -->
+    <path
+        android:fillColor="#FFB85C3B"
+        android:pathData="M28,24 H80 C84.4,24 88,27.6 88,32 V80 C88,84.4 84.4,88 80,88 H28 C23.6,88 20,84.4 20,80 V32 C20,27.6 23.6,24 28,24 Z" />
+    <path
+        android:fillColor="#FFFAF8F2"
+        android:pathData="M20,42 H88 V80 C88,84.4 84.4,88 80,88 H28 C23.6,88 20,84.4 20,80 Z" />
+    <path
+        android:fillColor="#FF2B2925"
+        android:pathData="M34,18 H40 V32 H34 Z M68,18 H74 V32 H68 Z" />
+
+    <!-- 简洁 N 字母代表 NEU，并保留日历格的几何秩序。 -->
+    <path
+        android:fillColor="#FF2B2925"
+        android:pathData="M34,51 H41 L61,72 V51 H68 V79 H61 L41,58 V79 H34 Z" />
+    <path
+        android:fillColor="#FFB85C3B"
+        android:pathData="M74,51 H80 V57 H74 Z M74,62 H80 V68 H74 Z M74,73 H80 V79 H74 Z" />
+</vector>

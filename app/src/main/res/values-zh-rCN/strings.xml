@@ -1,0 +1,578 @@
+<resources>
+    <string name="app_name">东大课表</string>
+    <string name="widget_today_label">今日课程</string>
+    <string name="widget_week_list_label">本周课表（列表）</string>
+    <string name="widget_week_grid_label">本周课表（网格）</string>
+    <string name="widget_twoday_label">最近两天</string>
+    <string name="widget_week_view_label">本周课表（周视图）</string>
+
+    <!-- Tabs -->
+    <string name="tab_schedule">课表</string>
+    <string name="tab_today">今日</string>
+    <string name="tab_mine">我的</string>
+    <string name="tab_manage">课表管理</string>
+
+    <!-- Schedule screen -->
+    <string name="schedule_empty">还没有课表</string>
+    <string name="schedule_empty_hint">从东北大学官方教务导入当前学期课表。</string>
+    <string name="schedule_go_manage">导入东北大学课表</string>
+    <string name="schedule_manual_first">手动创建第一门课</string>
+    <string name="schedule_add_course">添加课程</string>
+    <string name="schedule_current_week">第 %1$d 周</string>
+    <string name="schedule_no_course_today">今天没有课哦</string>
+
+    <!-- Import / Manage -->
+    <string name="import_title">导入课表</string>
+    <string name="manage_current_table">当前课表</string>
+    <string name="manage_import">导入课表</string>
+    <string name="manage_neu_import">东北大学教务导入</string>
+    <string name="manage_neu_import_sub">登录东北大学官方教务，读取当前学期课程</string>
+    <string name="manage_neu_only_hint">只保留学校官方教务导入，数据仅存于本机</string>
+    <string name="manage_import_sub">东北大学教务直连 / 文件 / 文本导入</string>
+    <string name="manage_new_table">新建课表</string>
+    <string name="manage_new_table_sub">创建一张空白课表，手动添加课程</string>
+    <string name="manage_edit_current">编辑当前课表</string>
+    <string name="manage_edit_current_sub">编辑当前课表名称、日期、节次时间</string>
+    <string name="manage_manual_add">手动添加课程</string>
+    <string name="manage_manual_add_sub">直接添加一门课程到当前课表</string>
+    <string name="table_info">开始日期: %1$s  |  第%2$d周  |  %3$d门课</string>
+    <string name="current_table_week">当前课表 · 第%1$d周</string>
+    <string name="table_start_date">开始日期: %1$s</string>
+    <string name="all_tables">所有课表</string>
+    <string name="all_tables_new">新建课表</string>
+    <string name="edit_table_title">编辑课表</string>
+    <string name="edit_table_basic_info">基础信息</string>
+    <string name="edit_table_name">课表名称</string>
+    <string name="edit_table_start_date">学期开始日期</string>
+    <string name="edit_table_start_date_hint">例如 2026-02-24</string>
+    <string name="edit_table_max_week">总周数</string>
+    <string name="edit_table_time_slots">节次时间表</string>
+    <string name="edit_table_delete">删除课表</string>
+    <string name="edit_table_save">保存课表设置</string>
+    <string name="edit_table_not_found">课表数据未找到</string>
+    <string name="edit_table_validation_error">日期需为 yyyy-MM-dd，时间需为 HH:mm 且开始早于结束</string>
+    <string name="edit_table_delete_confirm">确认删除</string>
+    <string name="edit_table_delete_msg">确定要删除课表「%1$s」吗？此操作不可撤销。</string>
+    <string name="edit_table_delete_msg_count">确定要删除课表「%1$s」吗？共 %2$d 门课程将一并删除，此操作不可撤销。</string>    <string name="default_table_name">默认</string>
+    <string name="import_paste">粘贴课表文本</string>
+    <string name="import_paste_hint">粘贴课表文本…</string>
+    <string name="import_file">从文件导入</string>
+    <string name="import_qr">扫码导入</string>
+    <string name="import_jw">教务直连</string>
+    <string name="import_manual">手动添加</string>
+    <string name="import_success">导入成功</string>
+    <string name="import_failed">导入失败：%1$s</string>
+    <string name="import_preview">预览导入</string>
+    <string name="import_parsing">解析中…</string>
+    <string name="import_supported_formats">支持格式</string>
+    <string name="import_preview_title">导入预览</string>
+    <string name="import_target_table">目标课表：%1$s</string>
+    <string name="import_new_table_hint">（将作为新课表创建）</string>
+    <string name="import_courses">导入课程</string>
+    <string name="import_conflicts">冲突课程</string>
+    <string name="import_appendable">可追加</string>
+    <string name="import_table_name">导入后课表名</string>
+    <string name="import_start_date">学期开始日期</string>
+    <string name="import_suggestion">建议</string>
+    <string name="import_no_conflict">没有冲突，可直接追加或覆盖</string>
+    <string name="import_conflict_count">发现 %1$d 门冲突课程。建议导入为新课表，或仅追加无冲突部分。</string>
+    <string name="import_conflict_more">还有 %1$d 条冲突未展开</string>
+    <string name="import_append_only">仅追加无冲突</string>
+    <string name="import_as_new">导入为新课表</string>
+    <string name="import_overwrite">⚠ 覆盖当前（谨慎）</string>
+    <string name="import_confirm_title">导入前确认</string>
+    <string name="import_confirm_body">先确认学期开始日期和每节时间，不然当前周次会一直不准。</string>
+    <string name="import_week_start">第一周从哪天开始</string>
+    <string name="import_confirm">确认导入</string>
+    <string name="import_all_conflict">没有可追加课程，全部与现有课表冲突</string>
+    <string name="import_content_empty">内容为空</string>
+    <string name="import_select_table">请先选择课表</string>
+    <string name="read_failed">读取失败: %1$s</string>
+    <string name="cannot_read_file">无法读取文件</string>
+    <string name="import_preview_sub">先预览，再导入，不让课表被一把覆盖</string>
+    <string name="format_wakeup_share">WakeUp 分享文本</string>
+    <string name="format_wakeup_desc">【来自WakeUp课程表】开头</string>
+    <string name="format_wakeup_json">WakeUp JSON</string>
+    <string name="format_json_desc">导出文件 .json</string>
+    <string name="format_ics">ICS 日历</string>
+    <string name="format_ics_desc">可从学校教务处导出</string>
+    <string name="format_csv">CSV 文件</string>
+    <string name="format_csv_desc">含表头的 .csv，逗号分隔</string>
+    <string name="format_html">HTML 表格</string>
+    <string name="format_html_desc">&lt;table&gt; 形式，识别表头后逐行解析</string>
+    <string name="format_plain">纯文本</string>
+    <string name="format_plain_desc">一行一课，制表符分隔</string>
+
+    <!-- 格式详情弹窗: 文案必须与 ScheduleParser 实际识别行为一致 -->
+    <string name="format_help_spec">识别要求</string>
+    <string name="format_help_example">示例</string>
+    <string name="format_help_close">知道了</string>
+    <string name="format_detail_content_desc">查看格式说明</string>
+    <string name="copy_prompt">复制 Prompt</string>
+    <string name="copied">已复制</string>
+    <string name="ai_prompt_title">让 AI 帮你转换截图</string>
+    <string name="ai_prompt_hint">把下面的 Prompt 复制给豆包、ChatGPT 等 AI，发送课表截图，AI 的输出直接粘贴回上方输入框即可导入。</string>
+    <string name="ai_prompt_text">任务：把接下来发给你的课表截图，按下面的格式转成纯文本输出。不要写任何解释、不要用 Markdown 代码块、不要输出任何规定之外的字符。\n\n输出整体由四个块组成，按这个顺序出现：\n块A：单行标记 &lt;&lt;&lt;SLEEPY-BEGIN&gt;&gt;&gt;（输出第一行）\n块B：作息表行（如果截图中能看到每节课的起止时间，才有这块；如果看不到作息时间，整块B连同它的两个时间标记一起省略——参见下面省略作息表的规则）\n块C：课程行\n块D：单行标记 &lt;&lt;&lt;SLEEPY-END&gt;&gt;&gt;（输出最后一行）\n\n块B和块C本身都不允许空行。块A和块B之间、块B和块C之间、块C和块D之间都可以有或没有空行（建议都不要空行，按示例来）。\n\n========== 块B：作息表 ==========\n\n作息表描述的是每天第N节课从几点到几点，适用于周一到周日全部相同的情况。如果每周不一样，按省略作息表的规则处理。\n\n作息表的标记：\n  &lt;&lt;&lt;SLEEPY-TIME-BEGIN&gt;&gt;&gt;\n  （作息行，每行一条）\n  &lt;&lt;&lt;SLEEPY-TIME-END&gt;&gt;&gt;\n（三个标记必须都出现或都不出现；不能只出现BEGIN或只出现END）\n\n作息行格式（两种写法都可以，按截图中实际形式选最贴合的）：\n  写法1：第N节 HH:MM-HH:MM\n    示例：第1节 08:00-09:35\n    说明：第N节表示第N节课，数字是节次编号，N从1开始；时间是该节课的起止时间。\n    如果截图中作息表是每节课单独一行的样式，用这种。\n  写法2：a-b HH:MM-HH:MM\n    示例：1-2 08:20-10:00\n    说明：a-b表示从第a节到第b节连续上同一时段；这里a和b之间的每一节（a、a+1、...、b）都使用同一段时间。\n    1-2 表示第1节和第2节都上08:20-10:00。\n    5 表示5 是 第5节单独 的简写，和 5-5 等价。\n    如果截图中作息表是连排多节共用同一时段的样式，用这种。\n\n作息行要求：\n  · 节次必须从 1 开始，按从小到大顺序排列\n  · 写法1和写法2不能混用——一份作息表只用其中一种\n  · 不能有空行\n  · 时间之间用一个空格分隔节次和起止时间\n  · HH:MM 是 24 小时制，HH 是 00-23，MM 是 00-59\n  · 不要在行首加 时间表  作息  课程表 等任何前缀\n\n省略作息表（块B）的规则——以下任意一种情况出现就完全省略块B及其三个标记行：\n  · 截图中完全没有看到任何起止时间\n  · 截图中每周每天的作息不一样（不能用一个作息表概括）\n  · 截图中能看到时间但你拿不准某节课具体几点\n\n========== 块C：课程行 ==========\n\n每个上课时段占一行，用 Tab（制表符，不是空格也不是逗号）分隔成 7 列。列的顺序和含义固定：\n  列1 课程名\n  列2 老师\n  列3 教室\n  列4 星期\n  列5 节次\n  列6 周次\n  列7 类型\n\n每一列的填写规则：\n  列1 课程名：截图中写的完整课程名，不删字不加字，不能包含 Tab 字符；如果同一门课在不同的时间上课，每个时段各占一行。\n  列2 老师：截图中有就写截图中写的全名；没有就写 -，绝不猜测。\n  列3 教室：截图中有就写截图中写的全名；没有就写 -，绝不猜测。\n  列4 星期：只能写数字 1 到 7，含义：1=周一，2=周二，3=周三，4=周四，5=周五，6=周六，7=周日。绝不能写周一 Monday 等。\n  列5 节次：写课程占用的连续节次。1-2 表示第1节和第2节都上这节课；3 表示只上第3节；3-5 表示第3、4、5节都上。必须是连续区间，不能写1,3,5。如果截图中两节不连续（比如第1节和第3节但第2节空着），按截图实际写1和3两条课程行，分别对应不同时间/周次。\n  列6 周次：\n    · 连续多周：用 a-b 表示从第a周到第b周，如 1-16 表示第1周至第16周连续上\n    · 不连续多周：用英文逗号分隔多个单周或区间，如 1,3,5 表示第1、第3、第5周；1-8,10,12-16 表示前8周加第10周加后5周\n    · 必须是数字 1-30 之间；超过30周视为学期安排异常，省略该课程行\n  列7 类型：只能写数字：0=每周都上；1=单周上（第1、3、5...周）；2=双周上（第2、4、6...周）。截图写单周/双周/每周也要转成数字。绝不能写 3 或其他数字。\n\n课程行的放弃规则——以下任意一种情况出现就完全省略该课程行（不输出）：\n  · 列4 星期 拿不准\n  · 列5 节次 拿不准\n  · 列6 周次 拿不准\n  · 列7 类型 拿不准（除上述映射外的情况）\n  · 列2 老师 或 列3 教室 缺失时填 -，不要因为它们缺失就放弃整行\n\n课程行内不能有空行。两个课程行之间也不要插空行。\n\n========== 标记行的写法 ==========\n\n所有标记行必须原样输出&lt;&lt;&lt;SLEEPY-BEGIN&gt;&gt;&gt;、&lt;&lt;&lt;SLEEPY-TIME-BEGIN&gt;&gt;&gt;、&lt;&lt;&lt;SLEEPY-TIME-END&gt;&gt;&gt;、&lt;&lt;&lt;SLEEPY-END&gt;&gt;&gt;，不能用反引号包起来（不能写 ```&lt;&lt;&lt;SLEEPY-BEGIN&gt;&gt;&gt;```），也不能改成 [SLEEPY-BEGIN] 这种方括号形式。\n标记行和内容之间用换行符隔开。标记行必须是字面字符，不能加空格（&lt;&lt;&lt;和SLEEPY之间不能加空格）。\n\n========== 完整示例（请只学习格式，不要复制内容）==========\n\n&lt;&lt;&lt;SLEEPY-BEGIN&gt;&gt;&gt;\n&lt;&lt;&lt;SLEEPY-TIME-BEGIN&gt;&gt;&gt;\n第1节 08:00-09:35\n第2节 09:55-11:30\n第3节 13:30-15:05\n&lt;&lt;&lt;SLEEPY-TIME-END&gt;&gt;&gt;\n高等数学	张三	A101	1	1-2	1-16	0\n大学英语	李四	B202	1	3-4	1-16	1\n体育	-	-	5	3	1-16	2\n&lt;&lt;&lt;SLEEPY-END&gt;&gt;&gt;</string>
+
+    <string name="format_wakeup_share_when">从 WakeUp 课程表 app 整体搬家。在 WakeUp 里点「分享课程」生成的整段文字，原样粘贴即可。</string>
+    <string-array name="format_wakeup_share_spec">
+        <item>整段分享文字原样复制，包括开头的【来自WakeUp课程表】</item>
+        <item>文字里要含有 courseDetailJson 字段（WakeUp 分享自动带上，不用自己改）</item>
+        <item>分享里的课表名、学期开始日期、每门课的颜色都会一并导入</item>
+    </string-array>
+    <string name="format_wakeup_share_example" formatted="false">【来自WakeUp课程表】\n课程分享:\n{"name":"我的课表","startDate":"2026-09-07","courseDetailJson":"%5B%7B%22name%22…%5D"}</string>
+
+    <string name="format_wakeup_json_when">WakeUp 导出的 .json 文件内容，或按下面的结构自己写 JSON。</string>
+    <string-array name="format_wakeup_json_spec">
+        <item>整个文本必须是 JSON：以 { 开头，里面有 courses 数组</item>
+        <item>顶层：name 课表名、startDate 学期开始日期（2026-09-07 这种写法）</item>
+        <item>每门课：name 课程名、teacher 老师、position 教室、day 星期（数字 1-7，1=周一）、startNode 第几节开始、step 连上几节、startWeek 和 endWeek 周次区间、type 类型（0 每周 / 1 单周 / 2 双周）</item>
+        <item>第 3-4 节的课 = startNode 填 3、step 填 2（不是 3 和 4）</item>
+        <item>color 颜色字段可省略</item>
+    </string-array>
+    <string name="format_wakeup_json_example" formatted="false">{\n  "name": "我的课表",\n  "startDate": "2026-09-07",\n  "courses": [\n    {"name":"高等数学","teacher":"张三","position":"A101","day":1,"startNode":1,"step":2,"startWeek":1,"endWeek":16,"type":0}\n  ]\n}</string>
+
+    <string name="format_ics_when">学校教务系统或 WakeUp 导出的日历文件（.ics）。用「从文件导入」选它，或用文本编辑器打开后复制全部内容粘贴。</string>
+    <string-array name="format_ics_spec">
+        <item>文本必须以 BEGIN:VCALENDAR 开头 —— 复制时漏掉第一行就识别不了</item>
+        <item>每节课是一条事件：SUMMARY 是课名、LOCATION 是教室，老师从描述里自动识别</item>
+        <item>上课星期按事件日期推算；学期第 1 周 = 最早事件所在周的周一</item>
+        <item>节次优先读描述里的「第X - Y节」，没有就按上/下课时间估算</item>
+        <item>单双周课（隔周重复的事件）会自动合并成一条</item>
+    </string-array>
+    <string name="format_ics_example" formatted="false">BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:高等数学\nLOCATION:A101\nDESCRIPTION:第1 - 2节\\nA101\\n张三\nDTSTART:20260907T010000Z\nDTEND:20260907T015500Z\nRRULE:FREQ=WEEKLY;UNTIL=20261227T010000Z\nEND:VEVENT\nEND:VCALENDAR</string>
+
+    <string name="format_csv_when">教务处导出的表格、Excel「另存为 CSV (逗号分隔)」后的文件内容。</string>
+    <string-array name="format_csv_spec">
+        <item>第一行是表头。必需列：课程（课程/课程名/名称）、星期（星期/周几/day）、节次、周次（周次/周数/weeks）</item>
+        <item>可选列：教师（教师/老师/teacher）、教室、类型、备注</item>
+        <item>节次两种写法：单列填 1-2，或拆成「开始节数」「结束节数」两列</item>
+        <item>星期填 1-7、周一、Monday 都可以</item>
+        <item>周次支持 1-16、2-5,7-9、11,13,15，多区间会拆成多门课</item>
+        <item>可选「开始时间」「结束时间」两列（HH:mm）：导入时自动套用真实作息，不用再手调</item>
+        <item>类型填 0/1/2 或 每周/单周/双周</item>
+    </string-array>
+    <string name="format_csv_example" formatted="false">课程名,教师,教室,星期,节次,周次,类型\n高等数学,张三,A101,周一,1-2,1-16,每周\n大学英语,李四,B202,3,3-4,1-16,单周</string>
+
+    <string name="format_html_when">教务网页课表：浏览器「另存为网页」得到的 .html 文件，或复制的表格源码。</string>
+    <string-array name="format_html_spec">
+        <item>文本必须以 &lt;!DOCTYPE、&lt;html、&lt;table 之类的标签开头 —— 前面带一段普通文字就识别不了，删掉再粘</item>
+        <item>页面里要有表格，且表头行里能找到「课程」字样</item>
+        <item>列名要求和 CSV 相同：课程、星期、节次、周次必需，教师、教室、类型、备注可选</item>
+        <item>同 CSV：可选「开始时间」「结束时间」两列，导入时自动套用真实作息</item>
+        <item>列是「周一~周日」的网格课表解析不了，需要「一行一门课」的长表格</item>
+    </string-array>
+    <string name="format_html_example" formatted="false">&lt;table&gt;\n&lt;tr&gt;&lt;td&gt;课程&lt;/td&gt;&lt;td&gt;教师&lt;/td&gt;&lt;td&gt;教室&lt;/td&gt;&lt;td&gt;星期&lt;/td&gt;&lt;td&gt;节次&lt;/td&gt;&lt;td&gt;周次&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;td&gt;高等数学&lt;/td&gt;&lt;td&gt;张三&lt;/td&gt;&lt;td&gt;A101&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;1-2&lt;/td&gt;&lt;td&gt;1-16&lt;/td&gt;&lt;/tr&gt;\n&lt;/table&gt;</string>
+
+    <string name="format_plain_when">最灵活的格式：一行一个上课时段。适合手打，更适合让 AI 从课表截图生成（见下方 Prompt）。</string>
+    <string-array name="format_plain_spec">
+        <item>列顺序固定：课程名、老师、教室、星期、节次、周次、类型（最后一列可省，默认每周）</item>
+        <item>列之间用 Tab、空格或全角逗号分隔</item>
+        <item>星期填 1-7 或 周一~周日 都可以</item>
+        <item>节次写区间：1-2；只上一节写单个数字：3</item>
+        <item>周次写区间：1-16</item>
+        <item>类型填 0/1/2 或 每周/单周/双周</item>
+        <item>老师或教室没有就填 - 占位；# 开头的行会被忽略</item>
+        <item>课程名里不能有空格，否则这行会被丢弃</item>
+        <item>作息行（可选）：第N节 HH:mm-HH:mm，放在课程行前面，导入后自动套用真实作息</item>
+        <item>AI 输出的废话不影响：数据包在 &lt;&lt;&lt;SLEEPY-BEGIN&gt;&gt;&gt; 和 &lt;&lt;&lt;SLEEPY-END&gt;&gt;&gt; 之间即可，标识外的内容自动忽略</item>
+    </string-array>
+    <string name="format_plain_example" formatted="false">&lt;&lt;&lt;SLEEPY-BEGIN&gt;&gt;&gt;\n第1节 08:00-09:35\n第2节 09:55-11:30\n第3节 13:30-15:05\n高等数学\t张三\tA101\t1\t1-2\t1-16\t0\n大学英语\t李四\tB202\t3\t3-4\t1-16\t1\n体育\t-\t-\t5\t3\t1-16\t2\n&lt;&lt;&lt;SLEEPY-END&gt;&gt;&gt;</string>
+    <string name="import_dropped_title">有 %1$d 行没能识别</string>
+    <string name="import_dropped_hint">这些行被跳过了，检查格式后可以重新导入：</string>
+    <string name="import_start_date_required">请填写学期开始日期</string>
+    <string name="start_date_format">日期格式应为YYYY-MM-DD</string>
+    <string name="slot_time_required">第 %1$d 节时间不能为空</string>
+    <string name="slot_time_invalid">第 %1$d 节时间无效（开始须早于结束）</string>
+    <string name="jw_config_title">确认课表节次</string>
+    <string name="jw_config_confirm">确认导入</string>
+    <string name="expand">点击展开</string>
+    <string name="collapse">点击收起</string>
+    <string name="n_periods">%1$d 节课</string>
+
+    <!-- Course detail -->
+    <string name="course_detail_title">课程详情</string>
+    <string name="course_detail_edit">编辑</string>
+    <string name="course_detail_delete">删除</string>
+    <string name="course_detail_edit_course">编辑这节课</string>
+    <string name="course_field_name">课程</string>
+    <string name="course_field_teacher">老师</string>
+    <string name="course_field_room">地点</string>
+    <string name="course_field_note">备注</string>
+    <string name="course_field_week">时间</string>
+    <string name="course_field_color">颜色</string>
+
+    <!-- Add/Edit Course -->
+    <string name="edit_course">编辑课程</string>
+    <string name="create_course">手动创建课程</string>
+    <string name="course_basic_info">课程基础信息</string>
+    <string name="course_basic_info_sub">老师、地点统一填写；一门课可以挂多个时段块</string>
+    <string name="course_name_required">课程名 *</string>
+    <string name="course_teacher">老师</string>
+    <string name="course_room">地点 / 教室</string>
+    <string name="course_note">备注（可选）</string>
+    <string name="course_color">颜色</string>
+    <string name="week_range">周次范围</string>
+    <string name="week_range_sub">整门课统一周次；同一课程内部时段会自动做冲突检查</string>
+    <string name="start_week">起始周</string>
+    <string name="end_week">结束周</string>
+    <string name="meeting_slots">上课时段</string>
+    <string name="meeting_slots_sub">一个课程可有任意多个时段；每个时段都可多选星期，并可按节次或按时间录入</string>
+    <string name="slot_n">时段 %1$d</string>
+    <string name="add_slot">新增一个上课时段</string>
+    <string name="save_course">保存课程</string>
+    <string name="delete_course">删除课程</string>
+    <string name="delete_course_confirm">确定要删除课程「%1$s」吗？此操作不可撤销。</string>
+    <string name="select_at_least_one_day">至少选一天</string>
+    <string name="delete_slot">删除时段</string>
+    <string name="start_node">开始第几节</string>
+    <string name="step_count">连上几节</string>
+    <string name="start_time">开始时间</string>
+    <string name="end_time">结束时间</string>
+    <string name="mode_by_node">按节次</string>
+    <string name="mode_by_time">按时间</string>
+    <string name="course_name_empty">课程名不能为空</string>
+    <string name="week_must_be_positive">周次必须大于 0</string>
+    <string name="slot_at_least_one_day">时段 %1$d 至少选择一天</string>
+    <string name="slot_start_node_positive">时段 %1$d 的开始节必须大于 0</string>
+    <string name="slot_step_positive">时段 %1$d 的连上节数必须大于 0</string>
+    <string name="slot_time_format">时段 %1$d 的开始/结束时间格式应为 HH:mm</string>
+    <string name="slot_time_order">时段 %1$d 的开始时间必须早于结束时间</string>
+    <string name="slot_time_overlap">时段 %1$d 与时段 %2$d 在 %3$s 存在时间重叠</string>
+    <string name="fix_issues_first">请先修正这些问题</string>
+    <string name="more_unexpanded">还有 %1$d 条未展开</string>
+    <string name="create_course_btn">创建课程</string>
+    <string name="selected_days">已选：%1$s</string>
+    <string name="time_format_hint">格式 HH:mm</string>
+
+    <!-- Mine -->
+    <string name="mine_title">我的</string>
+    <string name="mine_subtitle">管理你的课表与设置</string>
+    <string name="mine_refresh_widgets">刷新所有小组件</string>
+    <string name="mine_refresh_widgets_done">已刷新全部小组件</string>
+    <string name="mine_export">导出课表</string>
+    <!-- Export -->
+    <string name="export_title">导出课表</string>
+    <string name="export_no_table">暂无可导出的课表</string>
+    <string name="export_course_count">%1$d 门课程</string>
+    <string name="export_start_date">开学 %1$s</string>
+    <string name="export_json_title">WakeUp 兼容 JSON</string>
+    <string name="export_json_subtitle">完整课表结构，可被 WakeUp 课表等同类 App 直接导入</string>
+    <string name="export_share_title">分享文本</string>
+    <string name="export_share_subtitle">短文本格式，可粘贴到任何聊天工具</string>
+    <string name="export_ics_title">ICS 日历</string>
+    <string name="export_ics_subtitle">标准 iCalendar 格式，可导入系统日历 / Google / Apple Calendar</string>
+    <string name="export_share_chooser">分享课表</string>
+    <string name="export_saved_to">已保存到 Download/Sleepy/%1$s</string>
+    <string name="export_copied_hint">已调起分享面板</string>
+    <string name="export_failed">导出失败，请重试</string>
+    <string name="mine_stat_tables">课表数</string>
+    <string name="mine_stat_courses">课程数</string>
+    <string name="mine_stat_week">当前周</string>
+
+    <!-- More Settings -->
+    <string name="settings_language">语言 / Language</string>
+    <string name="settings_display_mode">课程时间显示</string>
+    <string name="settings_display_node">统一显示节次</string>
+    <string name="settings_display_node_sub">所有课程显示为「第N节」</string>
+    <string name="settings_display_time">统一显示时间</string>
+    <string name="settings_display_time_sub">所有课程显示为「HH:mm–HH:mm」</string>
+    <string name="settings_grid_sub_info">网格卡片副信息</string>
+    <string name="settings_grid_sub_room">教室</string>
+    <string name="settings_grid_sub_room_sub">课程名下方显示上课地点（无教室则不显示）</string>
+    <string name="settings_grid_sub_teacher">教师</string>
+    <string name="settings_grid_sub_teacher_sub">课程名下方显示授课教师（无教师则不显示）</string>
+    <string name="settings_grid_sub_none">无</string>
+    <string name="settings_grid_sub_none_sub">网格卡片只显示课程名</string>
+    <string name="settings_show_date">课表显示日期</string>
+    <string name="settings_show_date_sub">在每列表头显示具体日期（月/日）</string>
+    <string name="settings_visible_days">显示星期</string>
+    <string name="settings_visible_days_sub">取消勾选的星期将在所有视图中隐藏</string>
+    <string name="settings_vert_punct">竖排标点优化</string>
+    <string name="settings_vert_punct_sub">网格小组件课名竖排时将（）《》等横排符号替换为专用竖排符号（实验功能）</string>
+    <string name="settings_widget">小组件设置</string>
+    <string name="settings_widget_colorless">小组件统一课程底色</string>
+    <string name="settings_widget_colorless_sub">仅将带课程背景的小组件课程统一为中性底色；纯文字周视图不受影响，自定义颜色课程不受影响</string>
+    <string name="settings_course_colorless">课程胶囊统一底色</string>
+    <string name="settings_course_colorless_sub">仅将 App 内课程胶囊统一为中性底色；小组件设置不受影响，自定义颜色课程不受影响</string>
+    <string name="settings_widget_separator">周视图分隔线</string>
+    <string name="settings_holiday_holiday">法定节假日课程灰显</string>
+    <string name="settings_holiday_holiday_sub">法定节假日（如国庆、春节）当天的课程显示为灰色</string>
+    <string name="settings_holiday_entry_sub">设置灰显规则，查看节假日和补班日数据</string>
+    <string name="holiday_page_title">节假日与补班日</string>
+    <string name="holiday_data_source">数据源</string>
+    <string name="holiday_data_failed">节假日和补班日数据获取失败，请检查网络后重试</string>
+    <string name="holiday_data_empty">该年份暂无节假日和补班日数据</string>
+    <string name="holiday_data_refresh">刷新数据</string>
+    <string name="holiday_data_retry">重试</string>
+    <string name="holiday_year_prev">上一年</string>
+    <string name="holiday_year_next">下一年</string>
+    <string name="holiday_list_holidays">法定节假日</string>
+    <string name="holiday_list_workdays">补班日</string>
+    <string name="holiday_workday_badge">补班</string>
+    <string name="settings_holiday_title">节假日课程灰显</string>
+    <string name="settings_holiday_weekend">周末课程灰显</string>
+    <string name="settings_holiday_weekend_sub">自动将周六、周日的课程显示为灰色</string>
+    <string name="settings_holiday_style">灰显样式</string>
+    <string name="settings_holiday_style_grey">灰色</string>
+    <string name="settings_holiday_style_strikethrough">灰色加删除线</string>
+    <string name="settings_holiday_workday">忽略补班日</string>
+    <string name="settings_holiday_workday_sub">开启周末灰显时，补班的周六、周日不灰显</string>
+    <string name="holiday_edit_title">编辑自定义日期</string>
+    <string name="holiday_add_title">添加自定义日期</string>
+    <string name="holiday_name_label_date">开始日期</string>
+    <string name="holiday_name_label">名称</string>
+    <string name="holiday_name_label_end">结束日期</string>
+    <string name="holiday_date_invalid">日期无效或结束早于开始</string>
+    <string name="holiday_removed_section">已删除</string>
+    <string name="holiday_restore">恢复</string>
+    <string name="holiday_delete_range">删除</string>
+    <string name="holiday_type_holiday">法定节假日</string>
+    <string name="holiday_type_workday">补班日</string>
+    <string name="holiday_custom_badge">自定义</string>
+    <string name="holiday_add_entry">添加自定义日期</string>
+    <string name="settings_holiday_style_sub">选择灰显课程的样子</string>
+    <string name="settings_widget_separator_sub">纯文字周视图中课程名之间是否显示分隔线</string>
+
+    <!-- Theme -->
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_system_desc">Material You 动态取色（Android 12+）</string>
+
+    <!-- Schedule view modes -->
+    <string name="view_full">周视图</string>
+    <string name="view_cards">网格</string>
+
+    <!-- Today screen -->
+    <string name="today_today">今天</string>
+    <string name="today_no_course">今日无课程</string>
+    <string name="today_rest">休息 / 自习 都可以</string>
+
+    <!-- Common -->
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="back">返回</string>
+    <string name="selected">已选中</string>
+    <string name="action_settings">设置</string>
+    <string name="confirm_delete">确认删除</string>
+    <string name="no_course">无课</string>
+    <string name="n_courses">%1$d 门</string>
+    <string name="action_close">关闭</string>
+
+    <!-- Widget / Common UI -->
+    <string name="widget_create_schedule">请先创建课表</string>
+    <string name="widget_open_sleepy">打开东大课表开始添加</string>
+    <string name="more_sections">还有 %1$d 节…</string>
+    <string name="tomorrow">明天</string>
+    <string name="n_course_periods">%1$d 节课程</string>
+    <string name="course_node_format">第%1$s节</string>
+    <string name="course_period_range">%1$d-%2$d节</string>
+
+    <!-- JW Import -->
+    <string name="jw_no_url">该学校暂未配置教务 URL</string>
+    <string name="jw_pending_title">该学校暂未实现教务导入</string>
+    <string name="jw_pending_msg">%1$s 的教务系统未在 Sleepy 适配列表中。\n\n你可以：\n1. 点击「申请适配」提交给开发者\n2. 点击「手动输入 URL」在 WebView 打开并登录\n3. 暂用 HTML / CSV 文件导入，或手动添加课程</string>
+    <string name="jw_pending_supported">已支持</string>
+    <string name="jw_pending_pending">待适配</string>
+    <string name="jw_pending_grad">研究生</string>
+    <string name="jw_pending_legacy">旧版</string>
+    <string name="jw_pending_apply">申请适配</string>
+    <string name="jw_pending_input_url">手动输入 URL</string>
+    <string name="jw_pending_use_html">用 HTML 文件导入</string>
+    <string name="jw_pending_use_csv">用 CSV 文件导入</string>
+    <string name="jw_pending_manual">手动添加课程</string>
+    <string name="jw_pending_close">关闭</string>
+    <string name="school_count_supported">已支持 %1$d</string>
+    <string name="school_count_total">共 %1$d 所</string>
+    <string name="school_pinyin_hint">支持拼音首字母 / 学校英文简称 (如 hrbeu)</string>
+    <string name="jw_parse_empty">解析结果为空，请确认已到达「个人课表」页（而非首页/登录页）</string>
+    <string name="jw_import_success">成功导入 %1$d 门课程</string>
+    <string name="jw_parse_failed">解析失败：%1$s</string>
+    <string name="jw_parse_failed_hint">\n\n提示：HEU 需在浏览器中登录后导航到『个人课表』页面再点导入</string>
+    <string name="jw_webview_not_ready">WebView 未就绪</string>
+    <string name="jw_fetching">正在抓取课表…</string>
+    <string name="jw_fetch_failed_no_response">抓取失败：网页无响应（可能还在加载）</string>
+    <string name="jw_fetch_format_error">抓取返回格式异常</string>
+    <string name="jw_fetch_failed">抓取失败：%1$s</string>
+    <string name="jw_page_not_loaded">页面尚未完全加载</string>
+    <string name="jw_after_login">完成登录后</string>
+    <string name="jw_nav_hint">导航到「个人课表」页，再点右侧按钮</string>
+    <string name="jw_import_page">导入此页</string>
+
+    <!-- School Select -->
+    <string name="select_school">选择学校</string>
+    <string name="search_school">搜索学校…</string>
+    <string name="search_school_url">搜索学校或输入教务系统 URL…</string>
+    <string name="loading">加载中…</string>
+    <string name="no_school_found">未找到匹配的学校</string>
+    <string name="url_direct_login">直接用此 URL 登录</string>
+    <string name="url_detected">检测到：</string>
+    <string name="url_auto_detect">自动检测协议类型</string>
+
+    <!-- Course Detail -->
+    <string name="course_week_range">%1$s (%2$d-%3$d周)</string>
+
+    <!-- Date/Time Pickers -->
+    <string name="select_date">选择日期</string>
+    <string name="select_time">选择时间</string>
+
+    <!-- Time Slot Editor -->
+    <string name="add_period">添加一节</string>
+    <string name="start_label">开始</string>
+    <string name="end_label">结束</string>
+    <string name="delete_period">删除此节</string>
+
+    <!-- About -->
+    <string name="mine_about">关于</string>
+    <string name="mine_about_body">东大课表 v%1$s\n\n面向东北大学新版本科教务系统的本地优先课表工具。\n账号、Cookie 与课表不会上传到开发者服务器。\n\n· 无广告\n· 无追踪\n· 东北大学教务直连\n· 支持小组件、提醒与多格式导入导出</string>
+
+    <!-- Day of week array (index 0 = Mon) -->
+    <string-array name="day_names">
+        <item>周一</item>
+        <item>周二</item>
+        <item>周三</item>
+        <item>周四</item>
+        <item>周五</item>
+        <item>周六</item>
+        <item>周日</item>
+    </string-array>
+
+    <!-- Localized date / theme display -->
+    <string name="date_long_format">%1$d月%2$d日</string>
+    <string name="notif_title">今日课程 — %1$s %2$s</string>
+    <string name="notif_text">点击查看今日课程安排</string>
+
+    <!-- v1.0.20 提醒功能 -->
+    <string name="reminder_title">提醒</string>
+    <string name="reminder_master_title">开启提醒</string>
+    <string name="reminder_master_sub">允许东大课表发送课程通知</string>
+    <string name="reminder_daily_title">每日提醒</string>
+    <string name="reminder_daily_sub">每天在指定时间推送今日课程摘要</string>
+    <string name="reminder_daily_time_label">提醒时间</string>
+    <string name="reminder_daily_preview">示例：今日 15 号 您有 3 节课 第一节课 高等数学 于 08:00 在 教学楼A101 上课</string>
+    <string name="reminder_before_class_title">每节课前提醒</string>
+    <string name="reminder_before_class_sub">在每节课开始前提醒下节课信息</string>
+    <string name="reminder_before_minutes_label">提前</string>
+    <string name="reminder_before_minutes_unit">分钟</string>
+    <string name="reminder_before_class_preview">示例：下节课 高等数学 于 08:00 在 教学楼A101 上课</string>
+    <string name="reminder_banner_title">横幅提醒</string>
+    <string name="reminder_banner_sub">在系统通知栏显示课前横幅</string>
+    <string name="reminder_fluid_title">流体云 / 超级岛</string>
+    <string name="reminder_fluid_sub">在支持的小米、OPPO 手机上显示实时课程卡片</string>
+    <string name="reminder_fluid_fields">胶囊主显示内容</string>
+    <string name="reminder_fluid_fields_hint">选择一个主显示内容</string>
+    <string name="reminder_fluid_field_name">课程名称</string>
+    <string name="reminder_fluid_field_time">上课时间</string>
+    <string name="reminder_fluid_field_room">上课地点</string>
+    <string name="reminder_fluid_field_teacher">任课老师</string>
+    <string name="reminder_fluid_note">点击通知后可展开课程详情。具体是否显示为流体云/超级岛由手机系统、通知权限和厂商服务资格决定。</string>
+    <string name="reminder_pick_time">选择提醒时间</string>
+    <string name="action_confirm">确定</string>
+    <string name="action_cancel">取消</string>
+    <!-- Notification channels -->
+    <string name="notif_channel_daily">每日课程提醒</string>
+    <string name="notif_channel_daily_desc">每天在指定时间推送今日课程摘要</string>
+    <string name="notif_channel_before_class">课前提醒</string>
+    <string name="notif_channel_before_class_desc">每节课开始前推送下节课信息</string>
+    <string name="notif_channel_fluid">流体云 / 超级岛</string>
+    <string name="notif_channel_fluid_desc">课前显示可展开的课程实时卡片</string>
+    <!-- Notification content -->
+    <string name="notif_daily_title">今日 %1$d 号，您有 %2$d 节课</string>
+    <string name="notif_daily_text_first">第一节课 %1$s 于 %2$s 在 %3$s 上课</string>
+    <string name="notif_daily_title_no_course">今日 %1$d 号，今天没有课程</string>
+    <string name="notif_daily_text_no_course">好好休息，享受一天！</string>
+    <string name="notif_before_class_title">课前提醒</string>
+    <string name="notif_before_class_text">下节课 %1$s 于 %2$s 在 %3$s 上课</string>
+    <string name="notif_before_class_text_with_teacher">下节课 %1$s 于 %2$s 在 %3$s 上课，老师：%4$s</string>
+    <string name="notif_room_unknown">未知教室</string>
+
+    <!-- 关于页面 -->
+    <string name="about_title">关于</string>
+    <string name="about_version">版本信息</string>
+    <string name="about_version_detail">版本 %1$s（构建 %2$d）</string>
+    <string name="about_update">获取更新</string>
+    <string name="about_update_detail">GitHub 主站不可用时，自动回退镜像下载</string>
+    <string name="about_update_checking">正在检查更新…</string>
+    <string name="about_update_latest">当前已是最新版本 v%1$s</string>
+    <string name="update_found_title">发现新版本 v%1$s</string>
+    <string name="update_download">下载</string>
+    <string name="update_cancel">取消</string>
+    <string name="update_downloading">下载中 %1$d%%</string>
+    <string name="update_installing">下载完成，正在打开安装器</string>
+    <string name="update_retry">重试</string>
+    <string name="update_download_failed">下载失败：%1$s</string>
+    <string name="semester_out_of_range">当前不在学期范围内</string>
+    <string name="semester_not_started">学期未开始</string>
+    <string name="semester_ended">学期已结束</string>
+    <string name="schedule_week_prefix">第 %1$d 周</string>
+    <string name="today_semester_out_hint">学期范围外，课程仅供参考</string>
+    <string name="about_author">作者</string>
+    <string name="about_author_name">Lingion</string>
+    <string name="about_source">开源地址</string>
+    <string name="about_source_url">github.com/leavesvv-source/NEU-Timetable</string>
+    <string name="about_license_title">开源声明</string>
+    <string name="about_license_body">东大课表基于 Sleepy（GPL-3.0）开发，并使用 NEU_Wisedu2Wakeup_for_Android（MIT）的教务适配思路。派生项目继续按 GPL-3.0 开源。</string>
+    <string name="theme_name_default">暖纸</string>
+    <string name="theme_name_spring">春绿</string>
+    <string name="theme_name_ocean">海蓝</string>
+    <string name="theme_name_peach">蜜桃粉</string>
+    <string name="theme_name_slate">石板灰</string>
+    <!-- i18n: additional strings added for full localization -->
+    <string name="default_table_with_num">默认%1$d</string>
+    <string name="new_course">新课程</string>
+    <string name="jw_import_title">教务导入 - %1$s</string>
+    <string name="month_day_format">%1$d月%2$d日</string>
+    <string name="section_short">%1$d</string>
+    <string name="day_short_1">一</string>
+    <string name="day_short_2">二</string>
+    <string name="day_short_3">三</string>
+    <string name="day_short_4">四</string>
+    <string name="day_short_5">五</string>
+    <string name="day_short_6">六</string>
+    <string name="day_short_7">日</string>
+    <string name="section_node_format">第%1$d-%2$d节</string>
+    <string name="section_single">第%1$d 节</string>
+    <string name="mine_appearance">外观与显示</string>
+    <string name="mine_general">通用</string>
+    <string name="theme_appearance">外观</string>
+    <!-- 深浅色模式的"跟随系统",与主题取色的 theme_system(跟随系统)区分 -->
+    <string name="theme_mode_system">深浅色跟随系统</string>
+    <string name="theme_mode_light">浅色</string>
+    <string name="theme_mode_dark">深色</string>
+    <string name="appearance_section_theme">主题色彩</string>
+    <string name="appearance_section_display">课程显示</string>
+    <string name="appearance_section_widget">小组件</string>
+    <!-- i18n: hardcoded string extraction -->
+    <string name="edit_period_input">输入</string>
+    <string name="edit_period_duration_label">每节时长</string>
+    <string name="unit_minutes">分钟</string>
+    <string name="edit_period_total_label">总节数</string>
+    <string name="unit_periods">节</string>
+    <string name="edit_period_first_start">第一节开始</string>
+    <string name="short_break">小课间</string>
+    <string name="long_break">大课间</string>
+    <string name="break_assign_hint">课间分配（点击切换）</string>
+    <string name="preview">预览</string>
+    <string name="break_min_two_periods">总节数至少 2 节才能分配课间</string>
+    <string name="empty_placeholder">(空)</string>
+    <string name="period_format_node">第%1$s节</string>
+    <string name="period_time_range">第%1$s节  %2$s ~ %3$s</string>
+    <string name="break_continuous_0">  ↓ 0 分钟连续</string>
+    <string name="break_continuous_n">  ↓ %1$d 分钟 %2$s</string>
+    <string name="add_label">添加%1$s</string>
+    <string name="mode_manual">手动模式</string>
+    <string name="mode_auto">自动模式</string>
+    <string name="label_from">自</string>
+    <string name="schedule_jump_week">跳转到周次</string>
+    <string name="schedule_empty_name">「%1$s」还是空的</string>
+    <string name="schedule_empty_name_hint">从东北大学官方教务重新导入课表</string>
+    <string name="course_count_format">%1$d 门</string>
+    <string name="today_suffix"> · 今天</string>
+    <string name="no_course_today"> · 无课程</string>
+    <string name="default_course_name">课程</string>
+    <string name="default_room">上课地点</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="error_no_version_found">主站和镜像都没找到最新版本</string>
+    <string name="error_empty_download">下载文件为空</string>
+</resources>

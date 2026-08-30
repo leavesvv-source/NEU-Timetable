@@ -1,0 +1,35 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# Android
+*.apk
+*.aab
+*.jks
+*.keystore
+keystore.properties
+*.iml
+.idea/
+captures/
+
+# IDE
+.vscode/
+*.swp
+.DS_Store
+
+# Output
+*.log
+*.hprof
+.verify/token
+
+# Local release and migration artifacts
+.release-backup/
+.verify/
+release-build/
+rels.json
+
+# Temp query/result files (e.g. ad-hoc web search dumps)
+q*.json
+*.tmp
+*.bak
