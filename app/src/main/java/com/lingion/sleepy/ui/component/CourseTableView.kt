@@ -46,6 +46,7 @@ import com.lingion.sleepy.ui.theme.SleepyTextStyle
 import com.lingion.sleepy.ui.theme.SleepyTheme
 import com.lingion.sleepy.ui.theme.noRippleClickable
 import com.lingion.sleepy.util.AppPrefs
+import com.lingion.sleepy.util.CourseCollisionLayout
 import com.lingion.sleepy.util.CourseColorUtil
 import com.lingion.sleepy.util.DateUtils
 import com.lingion.sleepy.util.TimeTableUtils
@@ -118,6 +119,11 @@ fun CardsGridView(
             // 算出每列宽度 (dp)
             val colW = (maxWidth - timeW - gapW * (dayCount + 1)) / dayCount
             val gridH = rowH * maxNode   // grid 内容区固定高度
+            val coursePlacements = remember(courses, visibleDays, maxNode) {
+                CourseCollisionLayout.arrange(
+                    courses.filter { it.day in visibleDays && it.startNode in 1..maxNode }
+                )
+            }
 
             val scrollState = rememberScrollState()
 
@@ -177,13 +183,16 @@ fun CardsGridView(
                     }
 
                     // 课程卡片：用 offset 绝对定位
-                    for (course in courses) {
-                        if (course.day !in visibleDays) continue
-                        if (course.startNode !in 1..maxNode) continue
+                    for (placement in coursePlacements) {
+                        val course = placement.course
                         val dayIdx = sortedDays.indexOf(course.day)
                         val steps = course.step.coerceAtLeast(1)
                             .coerceAtMost(maxNode - course.startNode + 1)
-                        val cardX = timeW + gapW + (colW + gapW) * dayIdx
+                        val collisionGap = if (placement.laneCount > 1) 1.dp else 0.dp
+                        val laneWidth =
+                            (colW - collisionGap * (placement.laneCount - 1)) / placement.laneCount
+                        val dayX = timeW + gapW + (colW + gapW) * dayIdx
+                        val cardX = dayX + (laneWidth + collisionGap) * placement.lane
                         val cardY = rowH * (course.startNode - 1)
                         val cardH = rowH * steps - gapH
 
@@ -192,7 +201,7 @@ fun CardsGridView(
                             onClick = { onCourseClick(course) },
                             modifier = Modifier
                                 .offset(x = cardX, y = cardY)
-                                .width(colW)
+                                .width(laneWidth)
                                 .height(cardH),
                             isGrey = course.day in greyDays
                         )

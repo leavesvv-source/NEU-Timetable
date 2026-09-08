@@ -13,8 +13,8 @@ android {
         applicationId = "com.va1ess.neutimetable"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
         vectorDrawables { useSupportLibrary = true }
         androidResources {
             localeFilters += listOf("zh-rCN", "zh-rTW", "en", "ja", "es")

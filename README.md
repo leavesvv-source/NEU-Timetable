@@ -1,6 +1,6 @@
 # 东大课表
 
-面向东北大学 2026 新版本科教务系统的无广告 Android 课表。
+面向东北大学本科教务和强基班本研课表的无广告 Android 课表。
 
 > [!IMPORTANT]
 > 这是学生自用并开源的非官方项目，与东北大学及其教务系统运营方没有隶属或合作关系。
@@ -9,7 +9,9 @@
 
 - 校园网 / 东北大学 VPN 直连，校外自动回退学校 WebVPN
 - 在东北大学官方页面完成登录，不保存密码
-- 直接读取当前学期、课程、实验课、教师、教室、周次与校区
+- 支持本科教务，以及研究生教务中的强基班本科+研究生合并课表
+- 直接读取课程、实验课、教师、教室、周次、校区和研究生节次时间
+- 时间相撞的课程自动并排显示，不会互相遮挡
 - 导入前确认开学日期以及南湖 / 浑南作息
 - 周课表、今日课表、必要的课程修正与学期管理
 - 桌面小组件、课程提醒、深色模式
@@ -30,13 +32,15 @@ $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 
 `app/build/outputs/apk/release/app-arm64-v8a-release.apk`
 
-当前首版 Release 使用本机 Android 调试证书签名，仅用于安装测试；正式发布前应换成独立发布密钥。
+当前 Release 使用本机 Android 调试证书签名，仅用于安装测试；正式发布前应换成独立发布密钥。
 
 ## 隐私边界
 
 教务登录由应用内 WebView 打开东北大学官方域名完成。网络请求仅访问：
 
 - `jwxt.neu.edu.cn`
+- `yjs.neu.edu.cn`
+- `pass.neu.edu.cn`
 - `webvpn.neu.edu.cn`
 
 本应用不要求用户把账号、密码或 Cookie 交给开发者，不接入广告或统计 SDK。
@@ -52,6 +56,8 @@ $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 
 本项目基于 [Sleepy](https://github.com/lingion/sleepy) 的 GPL-3.0 代码，并参考、改造
 [NEU_Wisedu2Wakeup_for_Android](https://github.com/Zejin-Liu2022/NEU_Wisedu2Wakeup_for_Android)
-的 MIT 许可东大适配逻辑。详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+的本科教务适配逻辑，并参考了
+[shiguang_warehouse](https://github.com/XingHeYuZhuan/shiguang_warehouse)
+中 MIT 许可的东北大学研究生教务适配。详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 派生项目继续按 [GPL-3.0](LICENSE) 发布。

@@ -30,6 +30,9 @@ data class NeuNetworkConfig(val mode: NeuNetworkMode) {
             NeuWebVpnMapper.map("https://jwxt.neu.edu.cn/jwapp/sys/homeapp/index.do")
         }
 
+    val graduateLoginUrl: String
+        get() = resolve("https://yjs.neu.edu.cn/gsapp/sys/yjsemaphome/portal/index.do")
+
     val requestOrigin: String
         get() = if (mode == NeuNetworkMode.DIRECT) {
             "https://jwxt.neu.edu.cn"
@@ -40,19 +43,33 @@ data class NeuNetworkConfig(val mode: NeuNetworkMode) {
     val requestReferer: String
         get() = resolve("https://jwxt.neu.edu.cn/jwapp/sys/homeapp/home/index.html?av=&contextPath=/jwapp")
 
+    val graduateRequestOrigin: String
+        get() = if (mode == NeuNetworkMode.DIRECT) {
+            "https://yjs.neu.edu.cn"
+        } else {
+            "https://webvpn.neu.edu.cn"
+        }
+
+    val graduateRequestReferer: String
+        get() = resolve("https://yjs.neu.edu.cn/gsapp/sys/wdkbapp/*default/index.do#/xskcb")
+
     fun resolve(rawUrl: String): String =
         if (mode == NeuNetworkMode.DIRECT) rawUrl else NeuWebVpnMapper.map(rawUrl)
 }
 
 object NeuNetworkDetector {
     suspend fun detect(): NeuNetworkConfig = withContext(Dispatchers.IO) {
-        if (canReach("http://jwxt.neu.edu.cn") || canReach("https://jwxt.neu.edu.cn")) {
+        if (
+            canReach("http://jwxt.neu.edu.cn") ||
+            canReach("https://jwxt.neu.edu.cn") ||
+            canReach("https://yjs.neu.edu.cn")
+        ) {
             return@withContext NeuNetworkConfig(NeuNetworkMode.DIRECT)
         }
         if (canReach("https://webvpn.neu.edu.cn")) {
             return@withContext NeuNetworkConfig(NeuNetworkMode.WEB_VPN)
         }
-        throw IllegalStateException("无法访问东北大学教务系统或 WebVPN，请检查网络。")
+        throw IllegalStateException("无法访问东北大学本科/研究生教务系统或 WebVPN，请检查网络。")
     }
 
     private fun canReach(url: String): Boolean = try {

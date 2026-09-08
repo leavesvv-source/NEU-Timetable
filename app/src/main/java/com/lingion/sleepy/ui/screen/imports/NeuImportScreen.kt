@@ -35,14 +35,19 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
 import com.lingion.sleepy.data.neu.NeuCourseMapper
 import com.lingion.sleepy.data.neu.NeuCurrentUser
+import com.lingion.sleepy.data.neu.NeuGraduateClient
+import com.lingion.sleepy.data.neu.NeuGraduateTerm
 import com.lingion.sleepy.data.neu.NeuImportPayload
 import com.lingion.sleepy.data.neu.NeuJwxtClient
 import com.lingion.sleepy.data.neu.NeuNetworkConfig
 import com.lingion.sleepy.data.neu.NeuNetworkDetector
+import com.lingion.sleepy.ui.component.SegmentedSwitcher
 import com.lingion.sleepy.ui.theme.SleepyTheme
 import kotlinx.coroutines.launch
 
-/** 东北大学专用：官方 WebView 登录后，直接读取新教务 API 并进入课表预览。 */
+private enum class NeuImportPortal { UNDERGRADUATE, COMBINED_GRADUATE }
+
+/** 东北大学专用：官方 WebView 登录后，读取本科或强基班本研合并课表并进入预览。 */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun NeuImportScreen(
@@ -57,21 +62,32 @@ fun NeuImportScreen(
     var termCode by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var webView by remember { mutableStateOf<WebView?>(null) }
+    var portal by remember { mutableStateOf(NeuImportPortal.UNDERGRADUATE) }
 
-    val client = remember(networkConfig) {
+    fun cookieHeader(targetUrl: String): String? = CookieManager.getInstance().run {
+        flush()
+        listOf(
+            getCookie(targetUrl).orEmpty(),
+            getCookie("https://jwxt.neu.edu.cn").orEmpty(),
+            getCookie("https://yjs.neu.edu.cn").orEmpty(),
+            getCookie("https://pass.neu.edu.cn").orEmpty(),
+            getCookie("https://webvpn.neu.edu.cn").orEmpty()
+        ).filter(String::isNotBlank).distinct().joinToString("; ").ifBlank { null }
+    }
+
+    val undergraduateClient = remember(networkConfig) {
         networkConfig?.let { config ->
-            NeuJwxtClient(config) { targetUrl ->
-                CookieManager.getInstance().run {
-                    flush()
-                    listOf(
-                        getCookie(targetUrl).orEmpty(),
-                        getCookie("https://jwxt.neu.edu.cn").orEmpty(),
-                        getCookie("https://webvpn.neu.edu.cn").orEmpty()
-                    ).filter(String::isNotBlank).distinct().joinToString("; ").ifBlank { null }
-                }
-            }
+            NeuJwxtClient(config, ::cookieHeader)
         }
     }
+    val graduateClient = remember(networkConfig) {
+        networkConfig?.let { config ->
+            NeuGraduateClient(config, ::cookieHeader)
+        }
+    }
+
+    fun loginUrl(config: NeuNetworkConfig): String =
+        if (portal == NeuImportPortal.UNDERGRADUATE) config.loginUrl else config.graduateLoginUrl
 
     fun detectNetwork() {
         if (loading) return
@@ -81,7 +97,7 @@ fun NeuImportScreen(
                 .onSuccess { config ->
                     networkConfig = config
                     status = "已连接：${config.modeLabel}。请在下方东北大学官方页面登录。"
-                    webView?.loadUrl(config.loginUrl)
+                    webView?.loadUrl(loginUrl(config))
                 }
                 .onFailure { status = "网络检测失败：${it.message}" }
             loading = false
@@ -103,6 +119,31 @@ fun NeuImportScreen(
             TextButton(onClick = onBack) { Text("返回") }
         }
 
+        SegmentedSwitcher(
+            options = listOf(
+                NeuImportPortal.UNDERGRADUATE to "本科教务",
+                NeuImportPortal.COMBINED_GRADUATE to "本研课表（强基）"
+            ),
+            selected = portal,
+            onSelect = { selected ->
+                if (selected != portal) {
+                    portal = selected
+                    user = null
+                    termCode = if (selected == NeuImportPortal.COMBINED_GRADUATE) {
+                        NeuGraduateTerm.defaultCode()
+                    } else {
+                        ""
+                    }
+                    status = if (selected == NeuImportPortal.COMBINED_GRADUATE) {
+                        "请登录研究生教务；强基班账号会返回本科与研究生的全部课程。"
+                    } else {
+                        "请登录本科教务后检测登录状态。"
+                    }
+                    networkConfig?.let { webView?.loadUrl(loginUrl(it)) }
+                }
+            }
+        )
+
         Card(colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)) {
             Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(status, style = MaterialTheme.typography.bodySmall, color = colors.onSurface)
@@ -110,7 +151,11 @@ fun NeuImportScreen(
                     Text("${it.userName}（${it.userId}）", style = MaterialTheme.typography.bodyMedium, color = colors.primary)
                 }
                 Text(
-                    "登录发生在东北大学官方页面；本应用不保存密码，也不把 Cookie 或课表上传到第三方服务器。",
+                    if (portal == NeuImportPortal.COMBINED_GRADUATE) {
+                        "本研课表来自东北大学研究生教务，可能包含时间冲突课程；导入后会在网格中并排显示。"
+                    } else {
+                        "登录发生在东北大学官方页面；本应用不保存密码，也不把 Cookie 或课表上传到第三方服务器。"
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = colors.onSurfaceVariant
                 )
@@ -120,7 +165,12 @@ fun NeuImportScreen(
         OutlinedTextField(
             value = termCode,
             onValueChange = { termCode = it.trim() },
-            label = { Text("学期代码，例如 2026-2027-1") },
+            label = {
+                Text(
+                    if (portal == NeuImportPortal.UNDERGRADUATE) "学期代码，例如 2026-2027-1"
+                    else "研究生学期代码，例如 20261"
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -133,14 +183,20 @@ fun NeuImportScreen(
             ) { Text("重测网络") }
             Button(
                 onClick = {
-                    val currentClient = client
-                    if (currentClient == null) {
+                    if (networkConfig == null) {
                         status = "请先完成网络检测。"
                         return@Button
                     }
                     loading = true
                     scope.launch {
-                        runCatching { currentClient.fetchCurrentUser() }
+                        runCatching {
+                            when (portal) {
+                                NeuImportPortal.UNDERGRADUATE ->
+                                    requireNotNull(undergraduateClient).fetchCurrentUser()
+                                NeuImportPortal.COMBINED_GRADUATE ->
+                                    requireNotNull(graduateClient).fetchCurrentUser()
+                            }
+                        }
                             .onSuccess {
                                 user = it
                                 if (termCode.isBlank()) termCode = it.defaultTermCode
@@ -150,16 +206,15 @@ fun NeuImportScreen(
                         loading = false
                     }
                 },
-                enabled = !loading && client != null,
+                enabled = !loading && networkConfig != null,
                 modifier = Modifier.weight(1f)
             ) { Text("检测登录") }
         }
 
         Button(
             onClick = {
-                val currentClient = client
                 val selectedTerm = termCode.trim()
-                if (currentClient == null) {
+                if (networkConfig == null) {
                     status = "请先完成网络检测。"
                     return@Button
                 }
@@ -170,17 +225,41 @@ fun NeuImportScreen(
                 loading = true
                 scope.launch {
                     runCatching {
-                        val rows = currentClient.fetchSchedule(selectedTerm)
-                        val mapped = NeuCourseMapper.mapRows(rows)
-                        if (mapped.isEmpty()) error("课表记录存在，但周次解析后为空。")
-                        val startDate = currentClient.fetchTermStartDate(selectedTerm)
-                        NeuImportPayload(
-                            courses = mapped,
-                            startDate = startDate,
-                            timeRows = NeuCourseMapper.defaultTimeRows(rows),
-                            termCode = selectedTerm,
-                            termName = user?.termName.orEmpty()
-                        )
+                        when (portal) {
+                            NeuImportPortal.UNDERGRADUATE -> {
+                                val currentClient = requireNotNull(undergraduateClient)
+                                val rows = currentClient.fetchSchedule(selectedTerm)
+                                val mapped = NeuCourseMapper.mapRows(rows)
+                                if (mapped.isEmpty()) error("课表记录存在，但周次解析后为空。")
+                                NeuImportPayload(
+                                    courses = mapped,
+                                    startDate = currentClient.fetchTermStartDate(selectedTerm),
+                                    timeRows = NeuCourseMapper.defaultTimeRows(rows),
+                                    termCode = selectedTerm,
+                                    termName = user?.termName.orEmpty()
+                                )
+                            }
+                            NeuImportPortal.COMBINED_GRADUATE -> {
+                                val currentClient = requireNotNull(graduateClient)
+                                val normalizedTerm = NeuGraduateTerm.normalize(selectedTerm)
+                                    ?: error("研究生学期代码应为 20261，或 2026-2027-1。")
+                                val schedule = currentClient.fetchSchedule(normalizedTerm)
+                                val mapped = NeuCourseMapper.mapRows(schedule.rows)
+                                if (mapped.isEmpty()) error("本研课表记录存在，但周次解析后为空。")
+                                val resolvedStartDate = runCatching {
+                                    currentClient.fetchTermStartDate(normalizedTerm)
+                                }.getOrElse { NeuGraduateTerm.estimatedStartDate(normalizedTerm) }
+                                NeuImportPayload(
+                                    courses = mapped,
+                                    startDate = resolvedStartDate,
+                                    timeRows = schedule.timeRows.ifEmpty {
+                                        NeuCourseMapper.defaultTimeRows(schedule.rows)
+                                    },
+                                    termCode = normalizedTerm,
+                                    termName = NeuGraduateTerm.displayName(normalizedTerm)
+                                )
+                            }
+                        }
                     }.onSuccess {
                         status = "已读取 ${it.courses.size} 条课程，正在进入预览。"
                         onReady(it)
@@ -190,9 +269,14 @@ fun NeuImportScreen(
                     loading = false
                 }
             },
-            enabled = !loading && client != null,
+            enabled = !loading && networkConfig != null,
             modifier = Modifier.fillMaxWidth()
-        ) { Text("从东北大学教务导入") }
+        ) {
+            Text(
+                if (portal == NeuImportPortal.UNDERGRADUATE) "从本科教务导入"
+                else "导入本科与研究生课程"
+            )
+        }
 
         if (loading) LinearProgressIndicator(Modifier.fillMaxWidth())
 
@@ -206,7 +290,7 @@ fun NeuImportScreen(
                 )
             }
         } else {
-            key(config.mode) {
+            key(config.mode, portal) {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth().weight(1f).heightIn(min = 260.dp),
                     factory = { context ->
@@ -217,7 +301,7 @@ fun NeuImportScreen(
                             webViewClient = WebViewClient()
                             webChromeClient = WebChromeClient()
                             CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
-                            loadUrl(config.loginUrl)
+                            loadUrl(loginUrl(config))
                         }.also { webView = it }
                     }
                 )
