@@ -1,5 +1,6 @@
 package com.lingion.sleepy.data.neu
 
+import com.lingion.sleepy.data.entity.CourseSource
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -15,11 +16,13 @@ class NeuCourseMapperTest {
     @Test
     fun mapsOddWeekCourseWithoutLosingParity() {
         val mapped = NeuCourseMapper.mapRows(
-            listOf(NeuCourseRow("测试课", 2, 3, 4, "教师", "A101", "1-8单", "浑南校区"))
+            listOf(NeuCourseRow("测试课", 2, 3, 4, "教师", "A101", "1-8单", "浑南校区")),
+            CourseSource.GRADUATE
         )
         assertEquals(1, mapped.size)
         assertEquals(1, mapped.single().type)
         assertEquals(1, mapped.single().startWeek)
         assertEquals(7, mapped.single().endWeek)
+        assertEquals(CourseSource.GRADUATE, mapped.single().source)
     }
 }

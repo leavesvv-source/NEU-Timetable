@@ -30,6 +30,7 @@ class JwImportViewModel(application: Application) : AndroidViewModel(application
                 courseName = course.name.ifBlank { "未命名课程" },
                 teacher = course.teacher,
                 room = course.room,
+                source = course.source,
                 day = course.day.coerceIn(1, 7),
                 startNode = course.startNode.coerceAtLeast(1),
                 step = (course.endNode - course.startNode + 1).coerceAtLeast(1),

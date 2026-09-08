@@ -39,6 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lingion.sleepy.R
 import com.lingion.sleepy.data.jw.JwCourse
 import com.lingion.sleepy.data.jw.JwImportViewModel
+import com.lingion.sleepy.data.entity.CourseSource
 import com.lingion.sleepy.ui.component.DatePickerField
 import com.lingion.sleepy.ui.component.TimeSlotEditor
 import com.lingion.sleepy.ui.theme.SleepyTheme
@@ -95,7 +96,11 @@ class JwImportActivity : ComponentActivity() {
                                 runCatching {
                                     importViewModel.importAsNewTable(
                                         courses = parsedCourses,
-                                        tableName = getString(R.string.jw_import_title, "东北大学"),
+                                        tableName = when (parsedCourses.firstOrNull()?.source) {
+                                            CourseSource.UNDERGRADUATE -> "东北大学本科课表"
+                                            CourseSource.GRADUATE -> "东北大学研究生课表"
+                                            else -> getString(R.string.jw_import_title, "东北大学")
+                                        },
                                         startDate = startDate,
                                         timeJson = TimeTableUtils.buildTimeJsonFromRows(timeRows),
                                         nodesPerDay = timeRows.maxOfOrNull { it.node } ?: 0

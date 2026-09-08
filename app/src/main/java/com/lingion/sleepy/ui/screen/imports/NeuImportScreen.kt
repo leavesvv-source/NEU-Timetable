@@ -41,13 +41,14 @@ import com.lingion.sleepy.data.neu.NeuImportPayload
 import com.lingion.sleepy.data.neu.NeuJwxtClient
 import com.lingion.sleepy.data.neu.NeuNetworkConfig
 import com.lingion.sleepy.data.neu.NeuNetworkDetector
+import com.lingion.sleepy.data.entity.CourseSource
 import com.lingion.sleepy.ui.component.SegmentedSwitcher
 import com.lingion.sleepy.ui.theme.SleepyTheme
 import kotlinx.coroutines.launch
 
-private enum class NeuImportPortal { UNDERGRADUATE, COMBINED_GRADUATE }
+private enum class NeuImportPortal { UNDERGRADUATE, GRADUATE }
 
-/** 东北大学专用：官方 WebView 登录后，读取本科或强基班本研合并课表并进入预览。 */
+/** 东北大学专用：官方 WebView 登录后，分别读取本科或研究生课表并进入预览。 */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun NeuImportScreen(
@@ -122,20 +123,20 @@ fun NeuImportScreen(
         SegmentedSwitcher(
             options = listOf(
                 NeuImportPortal.UNDERGRADUATE to "本科教务",
-                NeuImportPortal.COMBINED_GRADUATE to "本研课表（强基）"
+                NeuImportPortal.GRADUATE to "研究生教务"
             ),
             selected = portal,
             onSelect = { selected ->
                 if (selected != portal) {
                     portal = selected
                     user = null
-                    termCode = if (selected == NeuImportPortal.COMBINED_GRADUATE) {
+                    termCode = if (selected == NeuImportPortal.GRADUATE) {
                         NeuGraduateTerm.defaultCode()
                     } else {
                         ""
                     }
-                    status = if (selected == NeuImportPortal.COMBINED_GRADUATE) {
-                        "请登录研究生教务；强基班账号会返回本科与研究生的全部课程。"
+                    status = if (selected == NeuImportPortal.GRADUATE) {
+                        "请登录研究生教务后检测登录状态。"
                     } else {
                         "请登录本科教务后检测登录状态。"
                     }
@@ -151,8 +152,8 @@ fun NeuImportScreen(
                     Text("${it.userName}（${it.userId}）", style = MaterialTheme.typography.bodyMedium, color = colors.primary)
                 }
                 Text(
-                    if (portal == NeuImportPortal.COMBINED_GRADUATE) {
-                        "本研课表来自东北大学研究生教务，可能包含时间冲突课程；导入后会在网格中并排显示。"
+                    if (portal == NeuImportPortal.GRADUATE) {
+                        "研究生课程来自东北大学研究生教务；与本科课表融合后，时间冲突课程会在网格中并排显示。"
                     } else {
                         "登录发生在东北大学官方页面；本应用不保存密码，也不把 Cookie 或课表上传到第三方服务器。"
                     },
@@ -193,7 +194,7 @@ fun NeuImportScreen(
                             when (portal) {
                                 NeuImportPortal.UNDERGRADUATE ->
                                     requireNotNull(undergraduateClient).fetchCurrentUser()
-                                NeuImportPortal.COMBINED_GRADUATE ->
+                                NeuImportPortal.GRADUATE ->
                                     requireNotNull(graduateClient).fetchCurrentUser()
                             }
                         }
@@ -229,7 +230,7 @@ fun NeuImportScreen(
                             NeuImportPortal.UNDERGRADUATE -> {
                                 val currentClient = requireNotNull(undergraduateClient)
                                 val rows = currentClient.fetchSchedule(selectedTerm)
-                                val mapped = NeuCourseMapper.mapRows(rows)
+                                val mapped = NeuCourseMapper.mapRows(rows, CourseSource.UNDERGRADUATE)
                                 if (mapped.isEmpty()) error("课表记录存在，但周次解析后为空。")
                                 NeuImportPayload(
                                     courses = mapped,
@@ -239,13 +240,13 @@ fun NeuImportScreen(
                                     termName = user?.termName.orEmpty()
                                 )
                             }
-                            NeuImportPortal.COMBINED_GRADUATE -> {
+                            NeuImportPortal.GRADUATE -> {
                                 val currentClient = requireNotNull(graduateClient)
                                 val normalizedTerm = NeuGraduateTerm.normalize(selectedTerm)
                                     ?: error("研究生学期代码应为 20261，或 2026-2027-1。")
                                 val schedule = currentClient.fetchSchedule(normalizedTerm)
-                                val mapped = NeuCourseMapper.mapRows(schedule.rows)
-                                if (mapped.isEmpty()) error("本研课表记录存在，但周次解析后为空。")
+                                val mapped = NeuCourseMapper.mapRows(schedule.rows, CourseSource.GRADUATE)
+                                if (mapped.isEmpty()) error("研究生课表记录存在，但周次解析后为空。")
                                 val resolvedStartDate = runCatching {
                                     currentClient.fetchTermStartDate(normalizedTerm)
                                 }.getOrElse { NeuGraduateTerm.estimatedStartDate(normalizedTerm) }
@@ -274,7 +275,7 @@ fun NeuImportScreen(
         ) {
             Text(
                 if (portal == NeuImportPortal.UNDERGRADUATE) "从本科教务导入"
-                else "导入本科与研究生课程"
+                else "从研究生教务导入"
             )
         }
 

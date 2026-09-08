@@ -19,7 +19,7 @@ data class NeuGraduateSchedule(
     val timeRows: List<TimeTableUtils.TimeSlotRow>
 )
 
-/** 东北大学研究生教务课表客户端；强基班账号返回本科与研究生课程的合并课表。 */
+/** 东北大学研究生教务课表客户端。 */
 class NeuGraduateClient(
     private val networkConfig: NeuNetworkConfig,
     private val cookieProvider: (String) -> String?

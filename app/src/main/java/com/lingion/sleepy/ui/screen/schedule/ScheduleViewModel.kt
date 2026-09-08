@@ -174,6 +174,14 @@ class ScheduleViewModel : ViewModel() {
         }
     }
 
+    fun mergeTables(firstId: Long, secondId: Long, name: String, onResult: (Result<Long>) -> Unit) {
+        viewModelScope.launch {
+            val result = runCatching { repo.mergeTables(firstId, secondId, name) }
+            result.getOrNull()?.let { selectTable(it) }
+            onResult(result)
+        }
+    }
+
     /** Discard a newly-created table that was never saved by the user.
      *  Deletes the table and reverts selection to the previous default table. */
     fun discardNewTable(newId: Long, fallbackId: Long?) {

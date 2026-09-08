@@ -1,9 +1,11 @@
 package com.lingion.sleepy.data.repository
 
+import androidx.room.withTransaction
 import com.lingion.sleepy.data.AppDatabase
 import com.lingion.sleepy.data.entity.CourseEntity
 import com.lingion.sleepy.data.entity.TimeTableEntity
 import com.lingion.sleepy.SleepyApp
+import com.lingion.sleepy.util.TableMergeUtils
 import com.lingion.sleepy.widget.WidgetUpdater
 import kotlinx.coroutines.flow.Flow
 
@@ -61,6 +63,38 @@ class ScheduleRepository(private val db: AppDatabase) {
     }
 
     suspend fun tableCount(): Int = tableDao.count()
+
+    /** 新建一张融合课表；两张来源表及其课程保持不变。 */
+    suspend fun mergeTables(firstId: Long, secondId: Long, name: String): Long {
+        val mergedId = db.withTransaction {
+            require(firstId != secondId) { "请选择两张不同的课表" }
+            val first = tableDao.getById(firstId) ?: error("第一张课表不存在")
+            val second = tableDao.getById(secondId) ?: error("第二张课表不存在")
+            val plan = TableMergeUtils.plan(
+                first,
+                courseDao.getByTable(firstId),
+                second,
+                courseDao.getByTable(secondId)
+            )
+            require(plan.courses.isNotEmpty()) { "两张课表都没有可融合的课程" }
+            val id = tableDao.insert(
+                first.copy(
+                    id = 0,
+                    name = name.trim().ifBlank { "融合课表" },
+                    startDate = plan.startDate,
+                    maxWeek = plan.maxWeek,
+                    nodesPerDay = plan.nodesPerDay,
+                    isDefault = true,
+                    createdAt = System.currentTimeMillis()
+                )
+            )
+            courseDao.insertAll(plan.courses.map { it.copy(tableId = id) })
+            tableDao.setDefault(id)
+            id
+        }
+        onDataChanged()
+        return mergedId
+    }
 
     // ========== Course ==========
 

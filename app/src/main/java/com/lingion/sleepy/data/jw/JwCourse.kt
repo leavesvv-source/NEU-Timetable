@@ -18,5 +18,6 @@ data class JwCourse(
     val endNode: Int,
     val startWeek: Int,
     val endWeek: Int,
-    val type: Int = 0  // 0=每周 1=单周 2=双周
+    val type: Int = 0,  // 0=每周 1=单周 2=双周
+    val source: String = ""
 )

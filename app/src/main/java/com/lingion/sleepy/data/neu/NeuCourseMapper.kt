@@ -12,7 +12,7 @@ data class NeuImportPayload(
 )
 
 object NeuCourseMapper {
-    fun mapRows(rows: List<NeuCourseRow>): List<JwCourse> = buildList {
+    fun mapRows(rows: List<NeuCourseRow>, source: String = ""): List<JwCourse> = buildList {
         for (row in rows) {
             val weeks = parseWeekNumbers(row.weeks)
             if (weeks.isEmpty()) continue
@@ -27,7 +27,8 @@ object NeuCourseMapper {
                         endNode = row.endSection.coerceAtLeast(row.beginSection),
                         startWeek = startWeek,
                         endWeek = endWeek,
-                        type = type
+                        type = type,
+                        source = source
                     )
                 )
             }

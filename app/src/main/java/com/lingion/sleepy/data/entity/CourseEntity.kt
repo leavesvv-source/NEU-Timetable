@@ -43,6 +43,9 @@ data class CourseEntity(
     /** 备注 */
     @ColumnInfo(name = "note") val note: String = "",
 
+    /** 导入来源：undergraduate / graduate；手动课程为空。 */
+    @ColumnInfo(name = "source", defaultValue = "''") val source: String = "",
+
     /** 周几 1-7 (周一=1) */
     @ColumnInfo(name = "day") val day: Int,
 

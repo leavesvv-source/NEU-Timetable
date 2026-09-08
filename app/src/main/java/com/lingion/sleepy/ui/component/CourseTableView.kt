@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.lingion.sleepy.R
 import com.lingion.sleepy.data.entity.CourseEntity
+import com.lingion.sleepy.data.entity.CourseSource
 import com.lingion.sleepy.ui.theme.SleepyTextStyle
 import com.lingion.sleepy.ui.theme.SleepyTheme
 import com.lingion.sleepy.ui.theme.noRippleClickable
@@ -279,6 +280,7 @@ private fun CourseOverlayCard(
         "teacher" -> course.teacher
         else -> ""
     }
+    val sourceBadge = CourseSource.badge(course.source)
 
     // 节假日灰显：色块叠 alpha + 文字应用 strikethrough 样式
     val effectiveBg = if (isGrey) bg.copy(alpha = SleepyTheme.Alpha.inactive) else bg
@@ -309,12 +311,16 @@ private fun CourseOverlayCard(
                 color = effectiveFg,
                 maxLines = 6,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(top = if (sourceBadge.isNotBlank()) 8.dp else 0.dp)
             )
         } else {
             // 有副信息: 课程名在剩余空间内居中, 副信息贴卡底 — 主文字不再紧贴副文字
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = if (sourceBadge.isNotBlank()) 8.dp else 0.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -342,6 +348,23 @@ private fun CourseOverlayCard(
                     textAlign = TextAlign.Center
                 )
             }
+        }
+        if (sourceBadge.isNotBlank()) {
+            Text(
+                text = sourceBadge,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    lineHeight = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = textDecoration
+                ),
+                color = effectiveFg,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(effectiveFg.copy(alpha = 0.14f))
+                    .padding(horizontal = 3.dp, vertical = 1.dp)
+            )
         }
     }
 }
